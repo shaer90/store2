@@ -161,8 +161,36 @@ function InstallOverlay({ lang, onDone }) {
   );
 }
 
+function WebBottomNav({ page, setPage, lang, cartCount, wishCount, onInstall }) {
+  const items = [
+    { id: 'home',    iconName: 'home',   ar: 'الرئيسية', en: 'Home' },
+    { id: 'shop',    iconName: 'grid',   ar: 'تسوق',     en: 'Shop' },
+    { id: 'search',  iconName: 'search', ar: 'بحث',      en: 'Search' },
+    { id: 'wish',    iconName: 'heart',  ar: 'المفضلة',  en: 'Saved', count: wishCount },
+    { id: 'account', iconName: 'user',   ar: 'حسابي',    en: 'Account' },
+  ];
+  return (
+    <div className="web-bottom-nav">
+      {items.map(it => (
+        <button key={it.id} className={page === it.id ? 'active' : ''} onClick={() => setPage(it.id)}>
+          <div className="rel">
+            <Icon name={it.iconName} size={20} />
+            {it.count > 0 && <span className="badge">{it.count}</span>}
+          </div>
+          <span>{lang === 'ar' ? it.ar : it.en}</span>
+        </button>
+      ))}
+      <button onClick={onInstall}>
+        <Icon name="download" size={20} />
+        <span>{lang === 'ar' ? 'تثبيت' : 'Install'}</span>
+      </button>
+    </div>
+  );
+}
+
 window.InstallOverlay = InstallOverlay;
 window.WebNav = WebNav;
+window.WebBottomNav = WebBottomNav;
 window.UspStrip = UspStrip;
 window.Newsletter = Newsletter;
 window.WebFooter = WebFooter;

@@ -218,6 +218,7 @@ function App() {
         </div>
       )}
 
+      {mode === 'web' && <WebBottomNav page={page} setPage={setPage} lang={lang} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} />}
       {mode === 'app' && <BottomNav page={page} setPage={setPage} lang={lang} />}
       {mode === 'app' && <div className="device-label">NOIR · PWA · Installed</div>}
       {installing && <InstallOverlay lang={lang} onDone={completeInstall} />}

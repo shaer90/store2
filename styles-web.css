@@ -404,10 +404,54 @@ body.mode-app.desktop-host .device-label {
   z-index: 2;
 }
 
+/* Mobile web bottom nav */
+.web-bottom-nav {
+  display: none;
+}
 @media (max-width: 720px) {
-  body.mode-web .web-nav { padding: 12px 16px; gap: 12px; }
+  body.mode-web .web-nav { padding: 10px 16px; gap: 8px; }
   body.mode-web .web-nav .links { display: none; }
-  body.mode-web .web-nav .web-search { width: 100%; }
+  body.mode-web .web-nav .web-search { display: none; }
+  body.mode-web .web-nav .install-cta { display: none; }
+  body.mode-web .web-nav .langtoggle { display: none; }
+
+  /* show bottom nav on mobile web */
+  body.mode-web .web-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: calc(56px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--bg-elev);
+    border-top: 1px solid var(--line);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 900;
+    align-items: center;
+    justify-content: space-around;
+  }
+  body.mode-web .web-bottom-nav button {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: 0; color: var(--ink-mute);
+    font-size: 9px; font-family: var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 10px; min-width: 48px;
+    transition: color .15s;
+  }
+  body.mode-web .web-bottom-nav button.active { color: var(--ink); }
+  body.mode-web .web-bottom-nav button .badge {
+    position: absolute; top: 2px; right: 8px;
+    background: var(--accent); color: #000; font-size: 9px;
+    border-radius: 999px; padding: 1px 5px; font-family: var(--font-mono);
+  }
+  body.mode-web .web-bottom-nav .rel { position: relative; }
+
+  body.mode-web .grid { padding: 0 18px 80px; gap: 10px; grid-template-columns: repeat(3, 1fr); }
+  body.mode-web .hero { margin: 18px; min-height: 460px; }
+  body.mode-web .hero-text { padding: 32px; }
+  body.mode-web .divider, body.mode-web .toolbar, body.mode-web .chips { padding-inline: 18px; }
+  body.mode-web .web-footer { padding: 40px 18px 80px; }
+  body.mode-web .web-footer .grid-cols { grid-template-columns: 1fr 1fr; gap: 24px; }
+  body.mode-web .web-newsletter { padding: 40px 18px; }
   body.mode-web .hero { margin: 18px; min-height: 460px; }
   body.mode-web .hero-text { padding: 32px; }
   body.mode-web .grid { padding: 0 18px 100px; gap: 10px; grid-template-columns: repeat(3, 1fr); }
