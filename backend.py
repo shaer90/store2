@@ -18,7 +18,7 @@ from passlib.context import CryptContext
 SECRET_KEY  = "noir-secret-key-change-in-prod"
 ALGORITHM   = "HS256"
 TOKEN_HOURS = 48
-DB_PATH     = Path(__file__).parent / "noir.db"
+DB_PATH     = Path(os.environ.get("NOIR_DB_PATH", str(Path(__file__).parent / "noir.db")))
 
 pwd_ctx  = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer   = HTTPBearer(auto_error=False)

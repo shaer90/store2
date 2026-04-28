@@ -1,0 +1,4 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault("NOIR_DB_PATH", "/tmp/noir.db")
+from backend import app
