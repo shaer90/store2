@@ -32,13 +32,19 @@ function App() {
     if (meta) meta.content = theme === 'light' ? '#f6f5f0' : '#0a0a0b';
   }, [theme]);
 
-  // Capture real PWA install prompt
+  // Capture real PWA install prompt (early + late)
   uE(() => {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
     setIsIOS(ios);
-    const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); };
+    // Pick up prompt captured before React loaded
+    if (window.__installPrompt) setDeferredPrompt(window.__installPrompt);
+    // Also listen for future firings
+    const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.__installPrompt = e; };
     window.addEventListener('beforeinstallprompt', handler);
-    window.addEventListener('appinstalled', () => { setDeferredPrompt(null); showToast(lang === 'ar' ? 'تم تثبيت التطبيق!' : 'App installed!'); });
+    window.addEventListener('appinstalled', () => {
+      setDeferredPrompt(null); window.__installPrompt = null;
+      showToast(lang === 'ar' ? 'تم تثبيت التطبيق!' : 'App installed!');
+    });
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
