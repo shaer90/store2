@@ -56,7 +56,6 @@ function App() {
   };
   const completeInstall = () => {
     setInstalling(false);
-    setMode('app');
     setPage('home');
   };
 
@@ -150,7 +149,6 @@ function App() {
 
   return (
     <div className="app">
-      <ModeSwitch mode={mode} setMode={setMode} lang={lang} theme={theme} setTheme={setTheme} />
       {headerNode}
 
       <div className={`page ${page==='home'?'active':''}`}>
