@@ -1,6 +1,6 @@
 // NOIR — Web variant: top nav, footer, newsletter, USP strip
 
-function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall, setShopFilter }) {
+function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall, setShopFilter, theme, setTheme }) {
   const t = window.NOIR_I18N[lang];
   const links = [
     { id: 'home',       ar: 'الرئيسية',   en: 'Home',        filter: null },
@@ -28,8 +28,11 @@ function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall,
         ))}
       </div>
       <div className="actions">
-        <button className="install-cta" onClick={onInstall}>
+        <button className="install-cta" onClick={onInstall} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Icon name="download" size={14} /> {t['install.web']}
+        </button>
+        <button className="iconbtn" onClick={() => setTheme && setTheme(theme === 'dark' ? 'light' : 'dark')} title="Theme" style={{ fontSize: '14px' }}>
+          {theme === 'dark' ? '☀' : '☾'}
         </button>
         <div className="web-search">
           <Icon name="search" size={14} />

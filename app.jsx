@@ -3,11 +3,8 @@
 const { useState: uS, useEffect: uE } = React;
 
 function detectInitialMode() {
-  const saved = localStorage.getItem('noir.mode');
-  if (saved === 'web' || saved === 'app') return saved;
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) return 'app';
-  return window.innerWidth >= 900 ? 'web' : 'app';
+  return isStandalone ? 'app' : 'web';
 }
 
 function App() {
@@ -116,7 +113,7 @@ function App() {
   const cartCount = store.cart.reduce((s, c) => s + c.qty, 0);
 
   const headerNode = mode === 'web'
-    ? <WebNav lang={lang} setLang={switchLang} page={page} setPage={setPage} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} setShopFilter={setShopFilter} />
+    ? <WebNav lang={lang} setLang={switchLang} page={page} setPage={setPage} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} setShopFilter={setShopFilter} theme={theme} setTheme={setTheme} />
     : <TopBar lang={lang} setLang={switchLang}
         onCart={() => setPage('cart')} onWish={() => setPage('wish')} onAccount={() => setPage('account')}
         cartCount={cartCount} wishCount={store.wish.length} />;
@@ -124,7 +121,6 @@ function App() {
   if (activeProduct) {
     return (
       <div className="app">
-        <ModeSwitch mode={mode} setMode={setMode} lang={lang} theme={theme} setTheme={setTheme} />
         {headerNode}
         <ProductDetail
           p={activeProduct} lang={lang}
@@ -144,7 +140,6 @@ function App() {
   if (checkoutOpen) {
     return (
       <div className="app">
-        <ModeSwitch mode={mode} setMode={setMode} lang={lang} theme={theme} setTheme={setTheme} />
         <CheckoutPage lang={lang} cart={store.cart} products={products}
           placeOrder={store.placeOrder} showToast={showToast}
           onClose={() => setCheckoutOpen(false)} setPage={setPage} />
