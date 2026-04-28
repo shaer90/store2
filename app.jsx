@@ -90,12 +90,14 @@ function App() {
     }
   }, []);
 
-  // Install prompt — only in app mode
+  // Install prompt — show on mobile after a few seconds
   uE(() => {
-    if (mode !== 'app' || installDismissed) { setInstallShown(false); return; }
+    if (installDismissed || window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+      setInstallShown(false); return;
+    }
     const timer = setTimeout(() => setInstallShown(true), 4500);
     return () => clearTimeout(timer);
-  }, [mode, installDismissed]);
+  }, [installDismissed]);
 
   uE(() => {
     if ('serviceWorker' in navigator) {
@@ -205,14 +207,14 @@ function App() {
       {mode === 'web' && page !== 'home' && page !== 'account' && <WebFooter lang={lang} setLang={switchLang} />}
       {mode === 'web' && page === 'home' && <WebFooter lang={lang} setLang={switchLang} />}
 
-      {installShown && !installDismissed && page !== 'cart' && mode === 'app' && (
+      {installShown && !installDismissed && page !== 'cart' && (
         <div className="install show">
           <div className="icon">N</div>
           <div className="body">
             <b>{t['install.title']}</b>
             <span style={{ opacity: 0.7 }}>{t['install.sub']}</span>
           </div>
-          <button className="btn" style={{ background: 'var(--accent)', color: '#000', padding: '8px 14px', fontSize: '12px' }} onClick={() => { setInstallDismissed(true); showToast(lang==='ar'?'جاري التثبيت...':'Installing...'); }}>
+          <button className="btn" style={{ background: 'var(--accent)', color: '#000', padding: '8px 14px', fontSize: '12px' }} onClick={() => { triggerInstall(); setInstallDismissed(true); }}>
             {t['install.btn']}
           </button>
           <button className="x" onClick={() => setInstallDismissed(true)}>
