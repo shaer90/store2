@@ -425,6 +425,7 @@ function LoginPage({ lang, onLogin }) {
         ? await api.login(email, pass)
         : await api.register(email, pass, name);
       api.saveToken(r.token);
+      if (r.user.is_admin) { window.location.href = '/admin.html'; return; }
       onLogin(r.user);
     } catch (e) {
       setError(
