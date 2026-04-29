@@ -66,7 +66,13 @@ function App() {
     setPage('home');
   };
 
-  const products = window.NOIR_PRODUCTS;
+  const [products, setProducts] = uS(window.NOIR_PRODUCTS || []);
+  uE(() => {
+    fetch('/api/products')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.products?.length) setProducts(d.products); })
+      .catch(() => {});
+  }, []);
   const store = useStore(authed);
   const [toastNode, showToast] = useToast();
   const t = window.NOIR_I18N[lang];
