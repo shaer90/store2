@@ -209,7 +209,7 @@ function App() {
       </div>
       <div className={`page ${page==='account'?'active':''}`}>
         {page === 'account' && (
-          <AccountPage lang={lang} orders={store.orders} isAuthed={authed} user={user}
+          <AccountPage lang={lang} orders={store.orders} isAuthed={authed} user={user} setPage={setPage}
             onLogin={(u) => { localStorage.setItem('noir.auth','1'); setAuthed(true); if(u) setUser(u); }}
             onLogout={() => { localStorage.removeItem('noir.auth'); window.NOIR_API.clearToken(); setAuthed(false); setUser(null); }} />
         )}

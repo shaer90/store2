@@ -326,10 +326,13 @@ function OrderSuccess({ lang, onClose, total, orderId }) {
 }
 
 // =============== ACCOUNT ===============
-function AccountPage({ lang, orders, onLogin, onLogout, isAuthed, user }) {
+function AccountPage({ lang, orders, onLogin, onLogout, isAuthed, user, setPage }) {
   const t = window.NOIR_I18N[lang];
   if (!isAuthed) {
     return <LoginPage lang={lang} onLogin={onLogin} />;
+  }
+  if (user?.is_admin) {
+    return <AdminPage lang={lang} user={user} onLogout={onLogout} setPage={setPage} />;
   }
   return (
     <div className="container" style={{ paddingBottom: '120px' }}>
@@ -425,7 +428,6 @@ function LoginPage({ lang, onLogin }) {
         ? await api.login(email, pass)
         : await api.register(email, pass, name);
       api.saveToken(r.token);
-      if (r.user.is_admin) { window.location.href = '/admin.html'; return; }
       onLogin(r.user);
     } catch (e) {
       setError(
