@@ -67,10 +67,15 @@ function App() {
   };
 
   const [products, setProducts] = uS(window.NOIR_PRODUCTS || []);
+  const [categories, setCategories] = uS([]);
   uE(() => {
     fetch('/api/products')
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.products?.length) setProducts(d.products); })
+      .catch(() => {});
+    fetch('/api/categories')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.categories) setCategories(d.categories); })
       .catch(() => {});
   }, []);
   const store = useStore(authed);
@@ -167,7 +172,7 @@ function App() {
       <div className={`page ${page==='home'?'active':''}`}>
         {page === 'home' && (
           <>
-            <HomePage lang={lang} products={products}
+            <HomePage lang={lang} products={products} categories={categories}
               wish={store.wish} toggleWish={handleWish}
               openProduct={openProduct} setPage={setPage} setShopFilter={setShopFilter} />
             {mode === 'web' && <UspStrip lang={lang} />}

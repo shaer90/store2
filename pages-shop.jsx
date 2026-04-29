@@ -1,16 +1,24 @@
 // NOIR — page-level components
 
 // =============== HOME ===============
-function HomePage({ lang, products, wish, toggleWish, openProduct, setPage, setShopFilter }) {
+function HomePage({ lang, products, categories, wish, toggleWish, openProduct, setPage, setShopFilter }) {
   const t = window.NOIR_I18N[lang];
-  const featured = products.filter(p => p.tag === 'lime' || p.tag === 'new').slice(0, 8);
+  const featured = products.filter(p => p.featured).slice(0, 8);
   const justLanded = products.filter(p => p.tag === 'new');
-  const collections = [
-    { id: 'outer', titleAr: 'معاطف الموسم', titleEn: 'Outerwear', metaAr: '12 قطعة', metaEn: '12 pieces', color: 'charcoal' },
-    { id: 'dresses', titleAr: 'فساتين', titleEn: 'Dresses', metaAr: '8 قطع', metaEn: '8 pieces', color: 'rose' },
-    { id: 'shoes', titleAr: 'أحذية', titleEn: 'Footwear', metaAr: '14 قطعة', metaEn: '14 pieces', color: 'clay' },
-    { id: 'bags', titleAr: 'حقائب', titleEn: 'Bags', metaAr: '6 قطع', metaEn: '6 pieces', color: 'olive' },
-  ];
+  const collectionCats = (categories || []).filter(c => c.is_collection);
+  const collections = collectionCats.length > 0
+    ? collectionCats.map(c => ({
+        id: c.id, color: 'charcoal',
+        titleAr: c.name_ar, titleEn: c.name_en,
+        metaAr: products.filter(p=>p.cat===c.id).length + ' قطعة',
+        metaEn: products.filter(p=>p.cat===c.id).length + ' pieces',
+      }))
+    : [
+        { id:'outer',   titleAr:'معاطف الموسم', titleEn:'Outerwear', metaAr:'12 قطعة', metaEn:'12 pieces', color:'charcoal' },
+        { id:'dresses', titleAr:'فساتين',        titleEn:'Dresses',   metaAr:'8 قطع',   metaEn:'8 pieces',  color:'rose'     },
+        { id:'shoes',   titleAr:'أحذية',         titleEn:'Footwear',  metaAr:'14 قطعة', metaEn:'14 pieces', color:'clay'     },
+        { id:'bags',    titleAr:'حقائب',         titleEn:'Bags',      metaAr:'6 قطع',   metaEn:'6 pieces',  color:'olive'    },
+      ];
 
   return (
     <>

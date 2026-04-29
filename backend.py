@@ -132,11 +132,20 @@ def init_db():
             pct    INTEGER NOT NULL,
             active INTEGER NOT NULL DEFAULT 1
         );
+        CREATE TABLE IF NOT EXISTS product_images (
+            id         TEXT PRIMARY KEY,
+            product_id TEXT NOT NULL,
+            data       TEXT NOT NULL,
+            is_primary INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0
+        );
     """)
     # Safe migrations for existing DBs
     for stmt in [
         "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE orders ADD COLUMN notes TEXT",
+        "ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE categories ADD COLUMN is_collection INTEGER NOT NULL DEFAULT 0",
     ]:
         try: c.execute(stmt); conn.commit()
         except: pass
@@ -166,7 +175,9 @@ def row_to_product(r):
         "cat": d["cat"], "price": d["price"], "was": d["was"], "color": d["color"],
         "sizes":  json.loads(d["sizes"])  if d["sizes"]  else [],
         "colors": json.loads(d["colors"]) if d["colors"] else [],
-        "tag": d["tag"], "meta": {"ar": d.get("meta_ar",""), "en": d.get("meta_en","")},
+        "tag": d["tag"], "featured": bool(d.get("featured", 0)),
+        "meta": {"ar": d.get("meta_ar",""), "en": d.get("meta_en","")},
+        "image": d.get("image"),
     }
 
 def create_token(uid: str) -> str:
@@ -229,10 +240,10 @@ class ProductBody(BaseModel):
     was: Optional[float]=None; color: Optional[str]=None
     sizes: Optional[List[str]]=[]; colors: Optional[List[str]]=[]
     tag: Optional[str]=None; meta_ar: Optional[str]=""; meta_en: Optional[str]=""
-    active: int=1
+    active: int=1; featured: int=0
 
 class CategoryBody(BaseModel):
-    name_ar: str; name_en: str; slug: str
+    name_ar: str; name_en: str; slug: str; is_collection: int=0
 
 class OrderStatusBody(BaseModel):
     status: str; notes: Optional[str]=None
@@ -258,13 +269,16 @@ def list_products(
     price_min: Optional[float]=None, price_max: Optional[float]=None,
     tag: Optional[str]=None, db: sqlite3.Connection=Depends(get_db),
 ):
-    where, params = ["active=1"], []
-    if cat and cat != "all": where.append("cat=?"); params.append(cat)
-    if tag: where.append("tag=?"); params.append(tag)
-    if price_min is not None: where.append("price>=?"); params.append(price_min)
-    if price_max is not None: where.append("price<=?"); params.append(price_max)
-    order_map = {"price_asc":" ORDER BY price ASC","price_desc":" ORDER BY price DESC","name":" ORDER BY name_en ASC"}
-    rows = db.execute(f"SELECT * FROM products WHERE {' AND '.join(where)}{order_map.get(sort,'')}", params).fetchall()
+    where, params = ["p.active=1"], []
+    if cat and cat != "all": where.append("p.cat=?"); params.append(cat)
+    if tag: where.append("p.tag=?"); params.append(tag)
+    if price_min is not None: where.append("p.price>=?"); params.append(price_min)
+    if price_max is not None: where.append("p.price<=?"); params.append(price_max)
+    order_map = {"price_asc":" ORDER BY p.price ASC","price_desc":" ORDER BY p.price DESC","name":" ORDER BY p.name_en ASC"}
+    rows = db.execute(
+        f"SELECT p.*, pi.data as image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE {' AND '.join(where)}{order_map.get(sort,'')}",
+        params
+    ).fetchall()
     results = [row_to_product(r) for r in rows]
     if q:
         ql = q.lower()
@@ -273,9 +287,20 @@ def list_products(
 
 @app.get("/api/products/{pid}")
 def get_product(pid: str, db: sqlite3.Connection=Depends(get_db)):
-    row = db.execute("SELECT * FROM products WHERE id=? AND active=1", (pid,)).fetchone()
+    row = db.execute(
+        "SELECT p.*, pi.data as image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.id=? AND p.active=1",
+        (pid,)
+    ).fetchone()
     if not row: raise HTTPException(404, "Product not found")
-    return row_to_product(row)
+    p = row_to_product(row)
+    imgs = db.execute("SELECT id,is_primary,sort_order FROM product_images WHERE product_id=? ORDER BY sort_order,id", (pid,)).fetchall()
+    p["images"] = [{"id":r["id"],"is_primary":bool(r["is_primary"])} for r in imgs]
+    return p
+
+@app.get("/api/categories")
+def list_categories(db: sqlite3.Connection=Depends(get_db)):
+    rows = db.execute("SELECT * FROM categories ORDER BY id").fetchall()
+    return {"categories": [dict(r) for r in rows]}
 
 # ── Auth ───────────────────────────────────────────────────────────────────
 @app.post("/api/auth/register", status_code=201)
@@ -388,23 +413,59 @@ def admin_stats(admin=Depends(get_admin_user), db=Depends(get_db)):
 def admin_list_products(admin=Depends(get_admin_user), db=Depends(get_db)):
     return {"products": [dict(r) for r in db.execute("SELECT * FROM products ORDER BY created DESC").fetchall()]}
 
+class ImageBody(BaseModel):
+    data: str  # base64 data URL
+
 @app.post("/api/admin/products", status_code=201)
 def admin_create_product(body: ProductBody, admin=Depends(get_admin_user), db=Depends(get_db)):
     pid = "p" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
     db.execute(
-        "INSERT INTO products (id,name_ar,name_en,cat,price,was,color,sizes,colors,tag,meta_ar,meta_en,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO products (id,name_ar,name_en,cat,price,was,color,sizes,colors,tag,meta_ar,meta_en,active,featured) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (pid,body.name_ar,body.name_en,body.cat,body.price,body.was,body.color,
-         json.dumps(body.sizes),json.dumps(body.colors),body.tag or None,body.meta_ar,body.meta_en,body.active)
+         json.dumps(body.sizes),json.dumps(body.colors),body.tag or None,body.meta_ar,body.meta_en,body.active,body.featured)
     ); db.commit(); return {"id": pid}
 
 @app.put("/api/admin/products/{pid}")
 def admin_update_product(pid: str, body: ProductBody, admin=Depends(get_admin_user), db=Depends(get_db)):
     if not db.execute("SELECT id FROM products WHERE id=?", (pid,)).fetchone(): raise HTTPException(404,"Not found")
     db.execute(
-        "UPDATE products SET name_ar=?,name_en=?,cat=?,price=?,was=?,color=?,sizes=?,colors=?,tag=?,meta_ar=?,meta_en=?,active=? WHERE id=?",
+        "UPDATE products SET name_ar=?,name_en=?,cat=?,price=?,was=?,color=?,sizes=?,colors=?,tag=?,meta_ar=?,meta_en=?,active=?,featured=? WHERE id=?",
         (body.name_ar,body.name_en,body.cat,body.price,body.was,body.color,
-         json.dumps(body.sizes),json.dumps(body.colors),body.tag or None,body.meta_ar,body.meta_en,body.active,pid)
+         json.dumps(body.sizes),json.dumps(body.colors),body.tag or None,body.meta_ar,body.meta_en,body.active,body.featured,pid)
     ); db.commit(); return {"ok":True}
+
+@app.get("/api/admin/products/{pid}/images")
+def admin_get_images(pid: str, admin=Depends(get_admin_user), db=Depends(get_db)):
+    rows = db.execute("SELECT id,is_primary,sort_order,data FROM product_images WHERE product_id=? ORDER BY sort_order,id", (pid,)).fetchall()
+    return {"images": [dict(r) for r in rows]}
+
+@app.post("/api/admin/products/{pid}/images", status_code=201)
+def admin_upload_image(pid: str, body: ImageBody, admin=Depends(get_admin_user), db=Depends(get_db)):
+    if not db.execute("SELECT id FROM products WHERE id=?", (pid,)).fetchone(): raise HTTPException(404,"Product not found")
+    has_any = db.execute("SELECT 1 FROM product_images WHERE product_id=? LIMIT 1", (pid,)).fetchone()
+    iid = str(uuid.uuid4())
+    db.execute("INSERT INTO product_images (id,product_id,data,is_primary,sort_order) VALUES (?,?,?,?,?)",
+               (iid, pid, body.data, 0 if has_any else 1, 0))
+    db.commit()
+    return {"id": iid, "is_primary": not has_any}
+
+@app.put("/api/admin/images/{iid}/primary")
+def admin_set_primary(iid: str, admin=Depends(get_admin_user), db=Depends(get_db)):
+    row = db.execute("SELECT product_id FROM product_images WHERE id=?", (iid,)).fetchone()
+    if not row: raise HTTPException(404,"Image not found")
+    db.execute("UPDATE product_images SET is_primary=0 WHERE product_id=?", (row["product_id"],))
+    db.execute("UPDATE product_images SET is_primary=1 WHERE id=?", (iid,))
+    db.commit(); return {"ok":True}
+
+@app.delete("/api/admin/images/{iid}")
+def admin_delete_image(iid: str, admin=Depends(get_admin_user), db=Depends(get_db)):
+    row = db.execute("SELECT product_id,is_primary FROM product_images WHERE id=?", (iid,)).fetchone()
+    if not row: raise HTTPException(404,"Image not found")
+    db.execute("DELETE FROM product_images WHERE id=?", (iid,))
+    if row["is_primary"]:
+        first = db.execute("SELECT id FROM product_images WHERE product_id=? LIMIT 1", (row["product_id"],)).fetchone()
+        if first: db.execute("UPDATE product_images SET is_primary=1 WHERE id=?", (first["id"],))
+    db.commit(); return {"ok":True}
 
 @app.delete("/api/admin/products/{pid}")
 def admin_delete_product(pid: str, admin=Depends(get_admin_user), db=Depends(get_db)):
@@ -418,13 +479,15 @@ def admin_list_categories(admin=Depends(get_admin_user), db=Depends(get_db)):
 @app.post("/api/admin/categories", status_code=201)
 def admin_create_category(body: CategoryBody, admin=Depends(get_admin_user), db=Depends(get_db)):
     if db.execute("SELECT id FROM categories WHERE slug=?", (body.slug,)).fetchone(): raise HTTPException(409,"Slug exists")
-    db.execute("INSERT INTO categories (id,name_ar,name_en,slug) VALUES (?,?,?,?)", (body.slug,body.name_ar,body.name_en,body.slug))
+    db.execute("INSERT INTO categories (id,name_ar,name_en,slug,is_collection) VALUES (?,?,?,?,?)",
+               (body.slug,body.name_ar,body.name_en,body.slug,body.is_collection))
     db.commit(); return {"id": body.slug}
 
 @app.put("/api/admin/categories/{cid}")
 def admin_update_category(cid: str, body: CategoryBody, admin=Depends(get_admin_user), db=Depends(get_db)):
     if not db.execute("SELECT id FROM categories WHERE id=?", (cid,)).fetchone(): raise HTTPException(404,"Not found")
-    db.execute("UPDATE categories SET name_ar=?,name_en=?,slug=? WHERE id=?", (body.name_ar,body.name_en,body.slug,cid))
+    db.execute("UPDATE categories SET name_ar=?,name_en=?,slug=?,is_collection=? WHERE id=?",
+               (body.name_ar,body.name_en,body.slug,body.is_collection,cid))
     db.commit(); return {"ok":True}
 
 @app.delete("/api/admin/categories/{cid}")

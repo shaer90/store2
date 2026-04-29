@@ -85,8 +85,10 @@ function ProductCard({ p, lang, onOpen, isWished, onWish, idx }) {
   return (
     <div className="card" style={{ animationDelay: `${(idx||0)*40}ms` }} onClick={() => onOpen(p)}>
       <div className="card-img">
-        <div className="blob">{p.name[lang][0]}</div>
-        <div className={swatchClass}></div>
+        {p.image
+          ? <img src={p.image} alt={p.name[lang]} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', borderRadius:'inherit' }} />
+          : <><div className="blob">{p.name[lang][0]}</div><div className={swatchClass}></div></>
+        }
         {p.tag === 'new' && <span className="card-tag">{t['common.new']}</span>}
         {p.tag === 'sale' && <span className="card-tag sale">{t['common.sale']}</span>}
         {p.tag === 'lime' && <span className="card-tag lime">{t['common.featured']}</span>}

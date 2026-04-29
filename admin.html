@@ -133,6 +133,26 @@ tbody tr:hover{background:rgba(255,255,255,.02)}
 .btcdel{background:var(--danger);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:13px}
 .btcdel:hover{opacity:.85}
 
+/* Images */
+.img-section{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
+.img-section h4{font-size:12px;color:var(--mute);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.img-thumb{position:relative;width:90px;height:90px;border-radius:10px;overflow:hidden;border:2px solid var(--line);flex-shrink:0;cursor:pointer;transition:border .15s}
+.img-thumb img{width:100%;height:100%;object-fit:cover}
+.img-thumb.primary{border-color:var(--accent)}
+.img-thumb .star{position:absolute;top:4px;insetInlineStart:4px;background:var(--accent);color:#000;font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px;display:none}
+.img-thumb.primary .star{display:block}
+.img-thumb .del{position:absolute;top:4px;insetInlineEnd:4px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:4px;font-size:12px;line-height:1;padding:3px 5px;opacity:0;transition:opacity .15s}
+.img-thumb:hover .del{opacity:1}
+.img-upload-btn{width:90px;height:90px;border-radius:10px;border:2px dashed var(--line);background:var(--bg3);color:var(--mute);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
+.img-upload-btn:hover{border-color:var(--accent);color:var(--accent)}
+.img-hint{font-size:11px;color:var(--mute)}
+
+/* Toggle btn */
+.tgl{background:none;border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s}
+.tgl.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.tgl:not(.on){color:var(--mute)}
+
 @media(max-width:720px){
   .sidebar{width:52px}
   .slogo .mark,.slogo .tag,.slogo-text,nav a span,.sbottom .sadmin,.sbottom button span{display:none}
@@ -209,7 +229,7 @@ tbody tr:hover{background:rgba(255,255,255,.02)}
               <button class="btnadd" onclick="openProductModal()">+ إضافة منتج</button>
             </div>
           </div>
-          <table><thead><tr><th>#</th><th>الاسم عربي</th><th>الاسم إنجليزي</th><th>القسم</th><th>السعر</th><th>كان</th><th>التاغ</th><th>الحالة</th><th></th></tr></thead>
+          <table><thead><tr><th>صورة</th><th>الاسم عربي</th><th>الاسم إنجليزي</th><th>القسم</th><th>السعر</th><th>كان</th><th>التاغ</th><th>أبرز</th><th>الحالة</th><th></th></tr></thead>
           <tbody id="productsBody"></tbody></table>
         </div>
       </div>
@@ -221,7 +241,7 @@ tbody tr:hover{background:rgba(255,255,255,.02)}
             <h2>الأقسام</h2>
             <button class="btnadd" onclick="openCatModal()">+ إضافة قسم</button>
           </div>
-          <table><thead><tr><th>المعرّف</th><th>الاسم عربي</th><th>الاسم إنجليزي</th><th>Slug</th><th></th></tr></thead>
+          <table><thead><tr><th>المعرّف</th><th>الاسم عربي</th><th>الاسم إنجليزي</th><th>Slug</th><th>تشكيلات مختارة</th><th></th></tr></thead>
           <tbody id="catsBody"></tbody></table>
         </div>
       </div>
@@ -287,14 +307,27 @@ tbody tr:hover{background:rgba(255,255,255,.02)}
       <div class="ff full"><label>المقاسات (مفصولة بفاصلة)</label><input id="pmSizes" placeholder="S,M,L,XL"></div>
       <div class="ff full"><label>الألوان المتاحة (مفصولة بفاصلة)</label><input id="pmColors" placeholder="ink,clay,olive"></div>
       <div class="ff"><label>التاغ</label>
-        <select id="pmTag"><option value="">بدون</option><option value="new">new</option><option value="sale">sale</option><option value="lime">lime</option></select>
+        <select id="pmTag"><option value="">بدون</option><option value="new">وصل حديثاً</option><option value="sale">تخفيض</option><option value="lime">مميز</option></select>
       </div>
       <div class="ff"><label>الحالة</label>
         <select id="pmActive"><option value="1">نشط</option><option value="0">مخفي</option></select>
       </div>
+      <div class="ff full" style="display:flex;align-items:center;gap:10px;padding:10px 0">
+        <input type="checkbox" id="pmFeatured" style="width:16px;height:16px;accent-color:var(--accent)">
+        <label for="pmFeatured" style="color:var(--ink);font-size:13px;cursor:pointer">⭐ الأبرز هذا الأسبوع</label>
+      </div>
       <div class="ff full"><label>وصف عربي</label><textarea id="pmMetaAr" placeholder="صوف إيطالي · مقاس عادي"></textarea></div>
       <div class="ff full"><label>وصف إنجليزي</label><textarea id="pmMetaEn" placeholder="Italian wool · Regular fit"></textarea></div>
     </div>
+
+    <div class="img-section">
+      <h4>الصور</h4>
+      <div class="img-grid" id="pmImgGrid"></div>
+      <label class="img-upload-btn" for="pmImgInput" title="رفع صورة">+</label>
+      <input type="file" id="pmImgInput" accept="image/*" multiple style="display:none" onchange="uploadImages(event)">
+      <div class="img-hint" style="margin-top:8px">اضغط على الصورة لتعيينها رئيسية · الصورة الرئيسية تظهر على بطاقة المنتج</div>
+    </div>
+
     <div class="merr" id="pmErr"></div>
     <div class="mact">
       <button class="btcancel" onclick="closeModal('productModal')">إلغاء</button>
@@ -312,6 +345,10 @@ tbody tr:hover{background:rgba(255,255,255,.02)}
       <div class="ff"><label>الاسم عربي *</label><input id="cmNameAr" placeholder="ملابس خارجية"></div>
       <div class="ff"><label>الاسم إنجليزي *</label><input id="cmNameEn" placeholder="Outerwear"></div>
       <div class="ff"><label>Slug (معرّف) *</label><input id="cmSlug" placeholder="outer"></div>
+      <div class="ff" style="display:flex;align-items:center;gap:10px;padding:8px 0">
+        <input type="checkbox" id="cmCollection" style="width:16px;height:16px;accent-color:var(--accent)">
+        <label for="cmCollection" style="color:var(--ink);font-size:13px;cursor:pointer">ضمن التشكيلات المختارة</label>
+      </div>
     </div>
     <div class="merr" id="cmErr"></div>
     <div class="mact">
@@ -504,22 +541,25 @@ function renderProducts(list) {
   const tbody = document.getElementById('productsBody');
   tbody.innerHTML = list.length ? list.map(p => `
     <tr>
-      <td class="muted">${p.id}</td>
+      <td>
+        ${p.data ? `<img src="${p.data}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;vertical-align:middle">` : `<div style="width:40px;height:40px;border-radius:6px;background:var(--bg3);display:inline-block;vertical-align:middle"></div>`}
+      </td>
       <td>${p.name_ar}</td>
       <td>${p.name_en}</td>
       <td>${catName(p.cat)}</td>
       <td>₪${p.price}</td>
       <td class="muted">${p.was ? '₪'+p.was : '—'}</td>
-      <td>${p.tag ? `<span class="bdg bdg-${p.tag}">${p.tag}</span>` : '—'}</td>
+      <td>${p.tag ? `<span class="bdg bdg-${p.tag}">${tagLabel(p.tag)}</span>` : '—'}</td>
+      <td>${p.featured ? '<span class="bdg bdg-lime">⭐ أبرز</span>' : ''}</td>
       <td><span class="bdg ${p.active ? 'bdg-on' : 'bdg-off'}">${p.active ? 'نشط' : 'مخفي'}</span></td>
       <td><div class="acell">
         <button class="btedit" onclick="openProductModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">تعديل</button>
         <button class="btdel" onclick="deleteProduct('${p.id}','${p.name_ar}')">حذف</button>
       </div></td>
-    </tr>`).join('') : '<tr><td colspan="9" class="empty">لا توجد منتجات</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="10" class="empty">لا توجد منتجات</td></tr>';
 }
 
-function openProductModal(p) {
+async function openProductModal(p) {
   const isNew = !p;
   document.getElementById('pmTitle').textContent = isNew ? 'إضافة منتج' : 'تعديل منتج';
   document.getElementById('pmId').value = p?.id || '';
@@ -532,39 +572,112 @@ function openProductModal(p) {
   document.getElementById('pmColors').value = p ? JSON.parse(p.colors||'[]').join(',') : '';
   document.getElementById('pmTag').value = p?.tag || '';
   document.getElementById('pmActive').value = p?.active ?? 1;
+  document.getElementById('pmFeatured').checked = !!(p?.featured);
   document.getElementById('pmMetaAr').value = p?.meta_ar || '';
   document.getElementById('pmMetaEn').value = p?.meta_en || '';
   document.getElementById('pmErr').textContent = '';
-  // Populate category select
   const sel = document.getElementById('pmCat');
   sel.innerHTML = allCategories.map(c => `<option value="${c.id}" ${p?.cat===c.id?'selected':''}>${c.name_ar} — ${c.name_en}</option>`).join('');
+  // Load images
+  document.getElementById('pmImgGrid').innerHTML = '';
+  if (p?.id) {
+    try {
+      const imgData = await api('GET', `/api/admin/products/${p.id}/images`);
+      renderImgGrid(imgData.images);
+    } catch(e) {}
+  }
   document.getElementById('productModal').classList.add('on');
+}
+
+function renderImgGrid(images) {
+  const grid = document.getElementById('pmImgGrid');
+  grid.innerHTML = images.map(img => `
+    <div class="img-thumb ${img.is_primary?'primary':''}" id="img-${img.id}" onclick="setPrimary('${img.id}')">
+      <img src="${img.data}">
+      <div class="star">رئيسية</div>
+      <button class="del" onclick="event.stopPropagation();deleteImg('${img.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function uploadImages(event) {
+  const pid = document.getElementById('pmId').value;
+  if (!pid) { toast('احفظ المنتج أولاً ثم أضف الصور', false); return; }
+  const files = Array.from(event.target.files);
+  for (const file of files) {
+    try {
+      const data = await compressImage(file);
+      const r = await api('POST', `/api/admin/products/${pid}/images`, {data});
+      const imgData = await api('GET', `/api/admin/products/${pid}/images`);
+      renderImgGrid(imgData.images);
+    } catch(e) { toast(e.message, false); }
+  }
+  event.target.value = '';
+}
+
+async function setPrimary(iid) {
+  const pid = document.getElementById('pmId').value;
+  try {
+    await api('PUT', `/api/admin/images/${iid}/primary`);
+    const imgData = await api('GET', `/api/admin/products/${pid}/images`);
+    renderImgGrid(imgData.images);
+  } catch(e) { toast(e.message, false); }
+}
+
+async function deleteImg(iid) {
+  const pid = document.getElementById('pmId').value;
+  try {
+    await api('DELETE', `/api/admin/images/${iid}`);
+    const imgData = await api('GET', `/api/admin/products/${pid}/images`);
+    renderImgGrid(imgData.images);
+  } catch(e) { toast(e.message, false); }
+}
+
+function compressImage(file, maxPx=700) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(maxPx/img.width, maxPx/img.height, 1);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*scale);
+      c.height = Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', 0.78));
+    };
+    img.src = URL.createObjectURL(file);
+  });
 }
 
 async function saveProduct() {
   const id = document.getElementById('pmId').value;
   const body = {
-    name_ar: document.getElementById('pmNameAr').value.trim(),
-    name_en: document.getElementById('pmNameEn').value.trim(),
-    cat:     document.getElementById('pmCat').value,
-    price:   parseFloat(document.getElementById('pmPrice').value) || 0,
-    was:     parseFloat(document.getElementById('pmWas').value) || null,
-    color:   document.getElementById('pmColor').value.trim(),
-    sizes:   document.getElementById('pmSizes').value.split(',').map(s=>s.trim()).filter(Boolean),
-    colors:  document.getElementById('pmColors').value.split(',').map(s=>s.trim()).filter(Boolean),
-    tag:     document.getElementById('pmTag').value || null,
-    active:  parseInt(document.getElementById('pmActive').value),
-    meta_ar: document.getElementById('pmMetaAr').value.trim(),
-    meta_en: document.getElementById('pmMetaEn').value.trim(),
+    name_ar:  document.getElementById('pmNameAr').value.trim(),
+    name_en:  document.getElementById('pmNameEn').value.trim(),
+    cat:      document.getElementById('pmCat').value,
+    price:    parseFloat(document.getElementById('pmPrice').value) || 0,
+    was:      parseFloat(document.getElementById('pmWas').value) || null,
+    color:    document.getElementById('pmColor').value.trim(),
+    sizes:    document.getElementById('pmSizes').value.split(',').map(s=>s.trim()).filter(Boolean),
+    colors:   document.getElementById('pmColors').value.split(',').map(s=>s.trim()).filter(Boolean),
+    tag:      document.getElementById('pmTag').value || null,
+    active:   parseInt(document.getElementById('pmActive').value),
+    featured: document.getElementById('pmFeatured').checked ? 1 : 0,
+    meta_ar:  document.getElementById('pmMetaAr').value.trim(),
+    meta_en:  document.getElementById('pmMetaEn').value.trim(),
   };
   if (!body.name_ar || !body.name_en || !body.cat || !body.price) {
     document.getElementById('pmErr').textContent = 'يرجى ملء الحقول المطلوبة (*)'; return;
   }
   try {
-    if (id) await api('PUT', `/api/admin/products/${id}`, body);
-    else    await api('POST', '/api/admin/products', body);
-    closeModal('productModal');
-    toast(id ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
+    if (id) {
+      await api('PUT', `/api/admin/products/${id}`, body);
+      closeModal('productModal');
+      toast('تم تحديث المنتج');
+    } else {
+      const r = await api('POST', '/api/admin/products', body);
+      document.getElementById('pmId').value = r.id;
+      document.getElementById('pmTitle').textContent = 'تعديل منتج — أضف صور';
+      toast('تم إضافة المنتج · يمكنك الآن رفع الصور');
+    }
     loadProducts();
   } catch(e) { document.getElementById('pmErr').textContent = e.message; }
 }
@@ -588,11 +701,16 @@ async function loadCategories() {
         <td>${c.name_ar}</td>
         <td>${c.name_en}</td>
         <td class="muted">${c.slug}</td>
+        <td>
+          <button class="tgl ${c.is_collection?'on':''}" onclick="toggleCollection('${c.id}',${c.is_collection?0:1},this)">
+            ${c.is_collection ? '✓ مضمّن' : '+ إضافة'}
+          </button>
+        </td>
         <td><div class="acell">
           <button class="btedit" onclick="openCatModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">تعديل</button>
           <button class="btdel" onclick="deleteCat('${c.id}','${c.name_ar}')">حذف</button>
         </div></td>
-      </tr>`).join('') : '<tr><td colspan="5" class="empty">لا توجد أقسام</td></tr>';
+      </tr>`).join('') : '<tr><td colspan="6" class="empty">لا توجد أقسام</td></tr>';
   } catch(e) { toast(e.message, false); }
 }
 
@@ -603,16 +721,30 @@ function openCatModal(c) {
   document.getElementById('cmNameEn').value = c?.name_en || '';
   document.getElementById('cmSlug').value = c?.slug || '';
   document.getElementById('cmSlug').disabled = !!c;
+  document.getElementById('cmCollection').checked = !!(c?.is_collection);
   document.getElementById('cmErr').textContent = '';
   document.getElementById('catModal').classList.add('on');
+}
+
+async function toggleCollection(id, val, btn) {
+  const cat = allCategories.find(c => c.id===id);
+  if (!cat) return;
+  try {
+    await api('PUT', `/api/admin/categories/${id}`, {name_ar:cat.name_ar,name_en:cat.name_en,slug:cat.slug,is_collection:val});
+    cat.is_collection = val;
+    btn.className = 'tgl' + (val ? ' on' : '');
+    btn.textContent = val ? '✓ مضمّن' : '+ إضافة';
+    toast(val ? 'تم إضافته للتشكيلات' : 'تم إزالته من التشكيلات');
+  } catch(e) { toast(e.message, false); }
 }
 
 async function saveCat() {
   const id = document.getElementById('cmId').value;
   const body = {
-    name_ar: document.getElementById('cmNameAr').value.trim(),
-    name_en: document.getElementById('cmNameEn').value.trim(),
-    slug:    document.getElementById('cmSlug').value.trim().toLowerCase(),
+    name_ar:       document.getElementById('cmNameAr').value.trim(),
+    name_en:       document.getElementById('cmNameEn').value.trim(),
+    slug:          document.getElementById('cmSlug').value.trim().toLowerCase(),
+    is_collection: document.getElementById('cmCollection').checked ? 1 : 0,
   };
   if (!body.name_ar || !body.name_en || !body.slug) {
     document.getElementById('cmErr').textContent = 'يرجى ملء جميع الحقول'; return;
@@ -735,6 +867,9 @@ async function loadUsers() {
 // ── Helpers ────────────────────────────────────────────────────────────────
 function statusLabel(s) {
   return {pending:'معلق',processing:'قيد المعالجة',shipped:'تم الشحن',delivered:'تم التسليم',cancelled:'ملغى'}[s] || s;
+}
+function tagLabel(t) {
+  return {new:'جديد',sale:'تخفيض',lime:'مميز'}[t] || t;
 }
 function catName(id) {
   const c = allCategories.find(c => c.id===id);
