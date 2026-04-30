@@ -436,9 +436,11 @@ function AdminPage({ lang, user, onLogout, setPage }) {
         <AdminModal title={editCat._edit ? 'تعديل قسم' : 'قسم جديد'} onClose={() => setEditCat(null)}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
             <AField label="الاسم عربي *"><input value={editCat.name_ar} onChange={e => setEditCat(c => ({...c, name_ar:e.target.value}))} placeholder="ملابس خارجية" /></AField>
-            <AField label="English name *"><input value={editCat.name_en} onChange={e => setEditCat(c => ({...c, name_en:e.target.value}))} placeholder="Outerwear" /></AField>
+            <AField label="English name *"><input value={editCat.name_en} onChange={e => setEditCat(c => ({
+              ...c, name_en: e.target.value,
+              slug: editCat._edit ? c.slug : e.target.value.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+            }))} placeholder="Outerwear" /></AField>
           </div>
-          <AField label="Slug (رابط القسم) *"><input value={editCat.slug} onChange={e => setEditCat(c => ({...c, slug:e.target.value}))} placeholder="outer" disabled={!!editCat._edit} /></AField>
           <label style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'10px', background:'var(--bg-elev-2)', border:'1px solid var(--line)', cursor:'pointer', marginBottom:'14px' }}>
             <input type="checkbox" checked={!!editCat.is_collection} onChange={e => setEditCat(c => ({...c, is_collection:e.target.checked?1:0}))}
               style={{ width:'16px', height:'16px', accentColor:'var(--accent)', flexShrink:0 }} />
