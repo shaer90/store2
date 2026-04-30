@@ -346,57 +346,73 @@ function AdminPage({ lang, user, onLogout, setPage }) {
 
       {/* ── PRODUCT MODAL ── */}
       {editProduct && (
-        <AdminModal title={editProduct.id ? 'تعديل منتج' : 'إضافة منتج'} onClose={() => setEditProduct(null)}>
-          <AField label="الاسم عربي *"><input value={editProduct.name_ar} onChange={e => setEditProduct(p => ({...p, name_ar:e.target.value}))} placeholder="معطف صوفي" /></AField>
-          <AField label="الاسم إنجليزي *"><input value={editProduct.name_en} onChange={e => setEditProduct(p => ({...p, name_en:e.target.value}))} placeholder="Wool Coat" /></AField>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-            <AField label="السعر ₪ *"><input type="number" value={editProduct.price} onChange={e => setEditProduct(p => ({...p, price:e.target.value}))} placeholder="299" /></AField>
-            <AField label="السعر القديم ₪"><input type="number" value={editProduct.was||''} onChange={e => setEditProduct(p => ({...p, was:e.target.value}))} placeholder="399" /></AField>
+        <AdminModal title={editProduct.id ? 'تعديل منتج' : 'منتج جديد'} onClose={() => setEditProduct(null)}>
+          {/* Names row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="الاسم عربي *"><input value={editProduct.name_ar} onChange={e => setEditProduct(p => ({...p, name_ar:e.target.value}))} placeholder="معطف صوفي" /></AField>
+            <AField label="English name *"><input value={editProduct.name_en} onChange={e => setEditProduct(p => ({...p, name_en:e.target.value}))} placeholder="Wool Coat" /></AField>
           </div>
-          <AField label="القسم *">
-            <select value={editProduct.cat} onChange={e => setEditProduct(p => ({...p, cat:e.target.value}))}>
-              <option value="">اختر قسم</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}
-            </select>
-          </AField>
-          <AField label="اللون الرئيسي"><input value={editProduct.color||''} onChange={e => setEditProduct(p => ({...p, color:e.target.value}))} placeholder="ink" /></AField>
-          <AField label="المقاسات (مفصولة بفاصلة)"><input value={editProduct.sizes||''} onChange={e => setEditProduct(p => ({...p, sizes:e.target.value}))} placeholder="S,M,L,XL" /></AField>
-          <AField label="الألوان (مفصولة بفاصلة)"><input value={editProduct.colors||''} onChange={e => setEditProduct(p => ({...p, colors:e.target.value}))} placeholder="ink,clay" /></AField>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-            <AField label="التاغ">
+          {/* Price row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="السعر ₪ *"><input type="number" value={editProduct.price} onChange={e => setEditProduct(p => ({...p, price:e.target.value}))} placeholder="299" /></AField>
+            <AField label="قبل التخفيض ₪"><input type="number" value={editProduct.was||''} onChange={e => setEditProduct(p => ({...p, was:e.target.value}))} placeholder="399" /></AField>
+          </div>
+          {/* Category + color row */}
+          <div style={{ display:'grid', gridTemplateColumns:'3fr 2fr', gap:'8px' }}>
+            <AField label="القسم *">
+              <select value={editProduct.cat} onChange={e => setEditProduct(p => ({...p, cat:e.target.value}))}>
+                <option value="">اختر قسم</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}
+              </select>
+            </AField>
+            <AField label="اللون الرئيسي"><input value={editProduct.color||''} onChange={e => setEditProduct(p => ({...p, color:e.target.value}))} placeholder="ink" /></AField>
+          </div>
+          {/* Sizes + colors row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="مقاسات (S,M,L)"><input value={editProduct.sizes||''} onChange={e => setEditProduct(p => ({...p, sizes:e.target.value}))} placeholder="S,M,L,XL" /></AField>
+            <AField label="ألوان (ink,clay)"><input value={editProduct.colors||''} onChange={e => setEditProduct(p => ({...p, colors:e.target.value}))} placeholder="ink,clay" /></AField>
+          </div>
+          {/* Tag + status + featured row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="تاغ">
               <select value={editProduct.tag||''} onChange={e => setEditProduct(p => ({...p, tag:e.target.value}))}>
-                <option value="">بدون</option><option value="new">وصل حديثاً</option><option value="sale">تخفيض</option><option value="lime">مميز</option>
+                <option value="">—</option><option value="new">جديد</option><option value="sale">تخفيض</option><option value="lime">مميز</option>
               </select>
             </AField>
             <AField label="الحالة">
               <select value={editProduct.active} onChange={e => setEditProduct(p => ({...p, active:parseInt(e.target.value)}))}>
-                <option value={1}>نشط</option><option value={0}>مخفي</option>
+                <option value={1}>نشط ✓</option><option value={0}>مخفي</option>
               </select>
             </AField>
           </div>
-          <label style={{ display:'flex', alignItems:'center', gap:'10px', margin:'4px 0 14px', cursor:'pointer' }}>
+          {/* Descriptions */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="وصف عربي"><textarea rows={2} value={editProduct.meta_ar||''} onChange={e => setEditProduct(p => ({...p, meta_ar:e.target.value}))} placeholder="صوف إيطالي · مقاس عادي" /></AField>
+            <AField label="Description EN"><textarea rows={2} value={editProduct.meta_en||''} onChange={e => setEditProduct(p => ({...p, meta_en:e.target.value}))} placeholder="Italian wool · Regular fit" /></AField>
+          </div>
+          {/* Featured toggle */}
+          <label style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'10px', background:'var(--bg-elev-2)', border:'1px solid var(--line)', cursor:'pointer', marginBottom:'4px' }}>
             <input type="checkbox" checked={!!editProduct.featured} onChange={e => setEditProduct(p => ({...p, featured:e.target.checked?1:0}))}
-              style={{ width:'18px', height:'18px', accentColor:'var(--accent)' }} />
-            <span>⭐ الأبرز هذا الأسبوع</span>
+              style={{ width:'16px', height:'16px', accentColor:'var(--accent)', flexShrink:0 }} />
+            <span style={{ fontSize:'13px' }}>⭐ إظهار في الأبرز</span>
           </label>
-          <AField label="وصف عربي"><textarea value={editProduct.meta_ar||''} onChange={e => setEditProduct(p => ({...p, meta_ar:e.target.value}))} placeholder="صوف إيطالي · مقاس عادي" /></AField>
-          <AField label="وصف إنجليزي"><textarea value={editProduct.meta_en||''} onChange={e => setEditProduct(p => ({...p, meta_en:e.target.value}))} placeholder="Italian wool · Regular fit" /></AField>
 
+          {/* Images section */}
           {editProduct.id && (
-            <div style={{ marginTop:'16px', paddingTop:'16px', borderTop:'1px solid var(--line)' }}>
-              <div style={{ fontSize:'11px', color:'var(--ink-mute)', marginBottom:'10px', letterSpacing:'.5px' }}>الصور · اضغط لتعيين الرئيسية</div>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', marginBottom:'8px' }}>
+            <div style={{ marginTop:'14px', paddingTop:'14px', borderTop:'1px solid var(--line)' }}>
+              <div style={{ fontSize:'10px', color:'var(--ink-mute)', marginBottom:'8px', letterSpacing:'.4px', textTransform:'uppercase' }}>الصور · اضغط لتعيين الرئيسية</div>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
                 {productImages.map(img => (
                   <div key={img.id} onClick={() => setPrimaryImg(img.id)} style={{
-                    position:'relative', width:'72px', height:'72px', borderRadius:'10px', overflow:'hidden', cursor:'pointer', flexShrink:0,
+                    position:'relative', width:'64px', height:'64px', borderRadius:'10px', overflow:'hidden', cursor:'pointer', flexShrink:0,
                     border: img.is_primary ? '2px solid var(--accent)' : '2px solid var(--line)',
                   }}>
                     <img src={img.data} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                    {img.is_primary && <div style={{ position:'absolute', top:'3px', insetInlineStart:'3px', background:'var(--accent)', color:'#000', fontSize:'9px', fontWeight:'700', borderRadius:'4px', padding:'1px 5px' }}>رئيسية</div>}
-                    <button onClick={e => { e.stopPropagation(); deleteImg(img.id); }} style={{ position:'absolute', top:'3px', insetInlineEnd:'3px', background:'rgba(0,0,0,.7)', color:'#fff', border:'none', borderRadius:'4px', fontSize:'12px', padding:'1px 5px', cursor:'pointer', lineHeight:1 }}>✕</button>
+                    {img.is_primary && <div style={{ position:'absolute', bottom:0, insetInlineStart:0, insetInlineEnd:0, background:'var(--accent)', color:'#000', fontSize:'8px', fontWeight:'700', textAlign:'center', padding:'2px 0' }}>✓</div>}
+                    <button onClick={e => { e.stopPropagation(); deleteImg(img.id); }} style={{ position:'absolute', top:'2px', insetInlineEnd:'2px', background:'rgba(0,0,0,.7)', color:'#fff', border:'none', borderRadius:'4px', fontSize:'10px', padding:'1px 4px', cursor:'pointer', lineHeight:1 }}>✕</button>
                   </div>
                 ))}
-                <label style={{ width:'72px', height:'72px', borderRadius:'10px', border:'2px dashed var(--line)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'26px', color:'var(--ink-mute)', cursor:'pointer', background:'var(--bg-elev-2)', flexShrink:0 }}>
+                <label style={{ width:'64px', height:'64px', borderRadius:'10px', border:'2px dashed var(--line)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'22px', color:'var(--ink-mute)', cursor:'pointer', background:'var(--bg-elev-2)', flexShrink:0 }}>
                   +
                   <input type="file" accept="image/*" multiple style={{ display:'none' }} onChange={async e => { for (const f of e.target.files) await uploadImage(f); e.target.value=''; }} />
                 </label>
@@ -404,44 +420,48 @@ function AdminPage({ lang, user, onLogout, setPage }) {
             </div>
           )}
 
-          <div style={{ display:'flex', gap:'10px', marginTop:'20px' }}>
-            <button className="btn btn-ghost" style={{ flex:1 }} onClick={() => setEditProduct(null)}>إلغاء</button>
-            <button className="btn btn-primary" style={{ flex:2 }} onClick={saveProduct} disabled={saving}>{saving ? '…' : 'حفظ'}</button>
+          <div style={{ display:'flex', gap:'8px', marginTop:'16px' }}>
+            <button className="btn btn-ghost" style={{ flex:1, fontSize:'13px' }} onClick={() => setEditProduct(null)}>إلغاء</button>
+            <button className="btn btn-primary" style={{ flex:2, fontSize:'13px' }} onClick={saveProduct} disabled={saving}>{saving ? '…' : 'حفظ المنتج'}</button>
           </div>
         </AdminModal>
       )}
 
       {/* ── CATEGORY MODAL ── */}
       {editCat && (
-        <AdminModal title={editCat._edit ? 'تعديل قسم' : 'إضافة قسم'} onClose={() => setEditCat(null)}>
-          <AField label="الاسم عربي *"><input value={editCat.name_ar} onChange={e => setEditCat(c => ({...c, name_ar:e.target.value}))} placeholder="ملابس خارجية" /></AField>
-          <AField label="الاسم إنجليزي *"><input value={editCat.name_en} onChange={e => setEditCat(c => ({...c, name_en:e.target.value}))} placeholder="Outerwear" /></AField>
-          <AField label="Slug *"><input value={editCat.slug} onChange={e => setEditCat(c => ({...c, slug:e.target.value}))} placeholder="outer" disabled={!!editCat._edit} /></AField>
-          <label style={{ display:'flex', alignItems:'center', gap:'10px', margin:'4px 0 14px', cursor:'pointer' }}>
+        <AdminModal title={editCat._edit ? 'تعديل قسم' : 'قسم جديد'} onClose={() => setEditCat(null)}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="الاسم عربي *"><input value={editCat.name_ar} onChange={e => setEditCat(c => ({...c, name_ar:e.target.value}))} placeholder="ملابس خارجية" /></AField>
+            <AField label="English name *"><input value={editCat.name_en} onChange={e => setEditCat(c => ({...c, name_en:e.target.value}))} placeholder="Outerwear" /></AField>
+          </div>
+          <AField label="Slug (رابط القسم) *"><input value={editCat.slug} onChange={e => setEditCat(c => ({...c, slug:e.target.value}))} placeholder="outer" disabled={!!editCat._edit} /></AField>
+          <label style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'10px', background:'var(--bg-elev-2)', border:'1px solid var(--line)', cursor:'pointer', marginBottom:'14px' }}>
             <input type="checkbox" checked={!!editCat.is_collection} onChange={e => setEditCat(c => ({...c, is_collection:e.target.checked?1:0}))}
-              style={{ width:'18px', height:'18px', accentColor:'var(--accent)' }} />
-            <span>ضمن التشكيلات المختارة</span>
+              style={{ width:'16px', height:'16px', accentColor:'var(--accent)', flexShrink:0 }} />
+            <span style={{ fontSize:'13px' }}>إظهار في تشكيلات الرئيسية</span>
           </label>
-          <div style={{ display:'flex', gap:'10px', marginTop:'12px' }}>
-            <button className="btn btn-ghost" style={{ flex:1 }} onClick={() => setEditCat(null)}>إلغاء</button>
-            <button className="btn btn-primary" style={{ flex:2 }} onClick={saveCat}>حفظ</button>
+          <div style={{ display:'flex', gap:'8px' }}>
+            <button className="btn btn-ghost" style={{ flex:1, fontSize:'13px' }} onClick={() => setEditCat(null)}>إلغاء</button>
+            <button className="btn btn-primary" style={{ flex:2, fontSize:'13px' }} onClick={saveCat}>حفظ القسم</button>
           </div>
         </AdminModal>
       )}
 
       {/* ── PROMO MODAL ── */}
       {editPromo && (
-        <AdminModal title={editPromo._isEdit ? 'تعديل كود' : 'إضافة كود خصم'} onClose={() => setEditPromo(null)}>
-          <AField label="الكود *"><input value={editPromo.code} onChange={e => setEditPromo(p => ({...p, code:e.target.value.toUpperCase()}))} placeholder="NOIR10" disabled={!!editPromo._isEdit} /></AField>
-          <AField label="نسبة الخصم % *"><input type="number" min="1" max="100" value={editPromo.pct} onChange={e => setEditPromo(p => ({...p, pct:e.target.value}))} placeholder="10" /></AField>
+        <AdminModal title={editPromo._isEdit ? 'تعديل كود' : 'كود خصم جديد'} onClose={() => setEditPromo(null)}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+            <AField label="الكود *"><input value={editPromo.code} onChange={e => setEditPromo(p => ({...p, code:e.target.value.toUpperCase()}))} placeholder="NOIR10" disabled={!!editPromo._isEdit} style={{ letterSpacing:'1px', fontFamily:'var(--font-mono)' }} /></AField>
+            <AField label="نسبة الخصم %"><input type="number" min="1" max="100" value={editPromo.pct} onChange={e => setEditPromo(p => ({...p, pct:e.target.value}))} placeholder="10" /></AField>
+          </div>
           <AField label="الحالة">
             <select value={editPromo.active} onChange={e => setEditPromo(p => ({...p, active:parseInt(e.target.value)}))}>
-              <option value={1}>نشط</option><option value={0}>متوقف</option>
+              <option value={1}>نشط ✓</option><option value={0}>متوقف</option>
             </select>
           </AField>
-          <div style={{ display:'flex', gap:'10px', marginTop:'12px' }}>
-            <button className="btn btn-ghost" style={{ flex:1 }} onClick={() => setEditPromo(null)}>إلغاء</button>
-            <button className="btn btn-primary" style={{ flex:2 }} onClick={savePromo}>حفظ</button>
+          <div style={{ display:'flex', gap:'8px', marginTop:'4px' }}>
+            <button className="btn btn-ghost" style={{ flex:1, fontSize:'13px' }} onClick={() => setEditPromo(null)}>إلغاء</button>
+            <button className="btn btn-primary" style={{ flex:2, fontSize:'13px' }} onClick={savePromo}>حفظ الكود</button>
           </div>
         </AdminModal>
       )}
@@ -457,12 +477,13 @@ const btnStyleGhost = { background:'none', border:'1px solid var(--line)', color
 
 function AdminModal({ title, onClose, children }) {
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.72)', zIndex:1000, display:'flex', alignItems:'flex-end' }}
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', zIndex:1000, display:'flex', alignItems:'flex-end', justifyContent:'center' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ background:'var(--bg)', borderRadius:'22px 22px 0 0', width:'100%', maxHeight:'92vh', overflowY:'auto', padding:'24px 20px 44px' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' }}>
-          <h3 style={{ fontSize:'16px', fontWeight:'700', fontFamily:'var(--font-display)' }}>{title}</h3>
-          <button onClick={onClose} style={{ background:'var(--bg-elev-2)', border:'none', color:'var(--ink)', borderRadius:'50%', width:'32px', height:'32px', fontSize:'16px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
+      <div style={{ background:'var(--bg)', borderRadius:'20px 20px 0 0', width:'100%', maxWidth:'540px', maxHeight:'90vh', overflowY:'auto', padding:'20px 18px 48px' }}>
+        <div style={{ width:'36px', height:'4px', borderRadius:'2px', background:'var(--line)', margin:'0 auto 18px' }}></div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'18px' }}>
+          <h3 style={{ fontSize:'15px', fontWeight:'700', fontFamily:'var(--font-display)', margin:0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background:'var(--bg-elev-2)', border:'none', color:'var(--ink-mute)', borderRadius:'50%', width:'28px', height:'28px', fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>✕</button>
         </div>
         {children}
       </div>
@@ -472,10 +493,10 @@ function AdminModal({ title, onClose, children }) {
 
 function AField({ label, children }) {
   return (
-    <div style={{ marginBottom:'12px' }}>
-      <label style={{ display:'block', fontSize:'11px', color:'var(--ink-mute)', marginBottom:'6px', letterSpacing:'.3px' }}>{label}</label>
+    <div style={{ marginBottom:'10px' }}>
+      <label style={{ display:'block', fontSize:'10px', color:'var(--ink-mute)', marginBottom:'5px', letterSpacing:'.4px', textTransform:'uppercase' }}>{label}</label>
       {React.Children.map(children, child => React.cloneElement(child, {
-        style: { width:'100%', background:'var(--bg-elev-2)', border:'1px solid var(--line)', borderRadius:'12px', padding:'11px 14px', color:'var(--ink)', fontSize:'14px', ...(child.props.style||{}) }
+        style: { width:'100%', background:'var(--bg-elev-2)', border:'1px solid var(--line)', borderRadius:'10px', padding:'9px 12px', color:'var(--ink)', fontSize:'13px', boxSizing:'border-box', ...(child.props.style||{}) }
       }))}
     </div>
   );
