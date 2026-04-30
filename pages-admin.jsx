@@ -94,9 +94,14 @@ function AdminPage({ lang, user, onLogout, setPage }) {
   const uploadImage = async (file) => {
     const pid = editProduct?.id;
     if (!pid) { showToast('احفظ المنتج أولاً'); return; }
-    const data = await compressImg(file);
-    try { await apiCall('POST', `/api/admin/products/${pid}/images`, { data }); await reloadImages(pid); showToast('✓ تم رفع الصورة'); }
-    catch (e) { showToast('✗ ' + e.message); }
+    let data;
+    try { data = await compressImg(file); } catch (e) { showToast('✗ ' + e.message); return; }
+    try {
+      const r = await apiCall('POST', `/api/admin/products/${pid}/images`, { data });
+      const isFirst = productImages.length === 0;
+      setProductImages(imgs => [...imgs, { id: r.id, data, is_primary: isFirst ? 1 : 0 }]);
+      showToast('✓ تم رفع الصورة');
+    } catch (e) { showToast('✗ ' + e.message); }
   };
   const setPrimaryImg = async (iid) => {
     const pid = editProduct?.id;
@@ -555,9 +560,11 @@ function TagInput({ label, values, onChange, suggestions = [] }) {
 }
 
 function compressImg(file, maxPx = 700) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
+      URL.revokeObjectURL(url);
       const scale = Math.min(maxPx / img.width, maxPx / img.height, 1);
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * scale);
@@ -565,7 +572,8 @@ function compressImg(file, maxPx = 700) {
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
       resolve(c.toDataURL('image/jpeg', 0.78));
     };
-    img.src = URL.createObjectURL(file);
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('فشل قراءة الصورة')); };
+    img.src = url;
   });
 }
 
