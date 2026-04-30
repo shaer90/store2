@@ -63,8 +63,8 @@ function AdminPage({ lang, user, onLogout, setPage }) {
       name_ar: editProduct.name_ar, name_en: editProduct.name_en, cat: editProduct.cat,
       price: parseFloat(editProduct.price) || 0, was: parseFloat(editProduct.was) || null,
       color: editProduct.color,
-      sizes:  (editProduct.sizes  || '').split(',').map(s => s.trim()).filter(Boolean),
-      colors: (editProduct.colors || '').split(',').map(s => s.trim()).filter(Boolean),
+      sizes:  Array.isArray(editProduct.sizes)  ? editProduct.sizes  : (editProduct.sizes  || '').split(',').map(s => s.trim()).filter(Boolean),
+      colors: Array.isArray(editProduct.colors) ? editProduct.colors : (editProduct.colors || '').split(',').map(s => s.trim()).filter(Boolean),
       tag: editProduct.tag || null, active: editProduct.active, featured: editProduct.featured,
       meta_ar: editProduct.meta_ar, meta_en: editProduct.meta_en,
     };
@@ -367,11 +367,15 @@ function AdminPage({ lang, user, onLogout, setPage }) {
             </AField>
             <AField label="اللون الرئيسي"><input value={editProduct.color||''} onChange={e => setEditProduct(p => ({...p, color:e.target.value}))} placeholder="ink" /></AField>
           </div>
-          {/* Sizes + colors row */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-            <AField label="مقاسات (S,M,L)"><input value={editProduct.sizes||''} onChange={e => setEditProduct(p => ({...p, sizes:e.target.value}))} placeholder="S,M,L,XL" /></AField>
-            <AField label="ألوان (ink,clay)"><input value={editProduct.colors||''} onChange={e => setEditProduct(p => ({...p, colors:e.target.value}))} placeholder="ink,clay" /></AField>
-          </div>
+          {/* Sizes + colors */}
+          <TagInput label="المقاسات"
+            values={Array.isArray(editProduct.sizes) ? editProduct.sizes : (editProduct.sizes||'').split(',').map(s=>s.trim().toUpperCase()).filter(Boolean)}
+            onChange={v => setEditProduct(p => ({...p, sizes:v}))}
+            suggestions={['XS','S','M','L','XL','XXL','36','37','38','39','40','41','42','43','44']} />
+          <TagInput label="الألوان"
+            values={Array.isArray(editProduct.colors) ? editProduct.colors : (editProduct.colors||'').split(',').map(s=>s.trim().toUpperCase()).filter(Boolean)}
+            onChange={v => setEditProduct(p => ({...p, colors:v}))}
+            suggestions={['INK','CLAY','OLIVE','MIST','SAGE','CREAM','ROSE','AMBER','COBALT','CHARCOAL','BLOOD']} />
           {/* Tag + status + featured row */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
             <AField label="تاغ">
@@ -498,6 +502,48 @@ function AField({ label, children }) {
       {React.Children.map(children, child => React.cloneElement(child, {
         style: { width:'100%', background:'var(--bg-elev-2)', border:'1px solid var(--line)', borderRadius:'10px', padding:'9px 12px', color:'var(--ink)', fontSize:'13px', boxSizing:'border-box', ...(child.props.style||{}) }
       }))}
+    </div>
+  );
+}
+
+function TagInput({ label, values, onChange, suggestions = [] }) {
+  const [draft, setDraft] = React.useState('');
+  const add = (val) => {
+    const v = val.trim().toUpperCase();
+    if (!v || values.includes(v)) return;
+    onChange([...values, v]);
+    setDraft('');
+  };
+  const remove = (v) => onChange(values.filter(x => x !== v));
+  return (
+    <div style={{ marginBottom:'10px' }}>
+      <label style={{ display:'block', fontSize:'10px', color:'var(--ink-mute)', marginBottom:'5px', letterSpacing:'.4px', textTransform:'uppercase' }}>{label}</label>
+      <div style={{ background:'var(--bg-elev-2)', border:'1px solid var(--line)', borderRadius:'10px', padding:'8px 10px' }}>
+        {/* Tags */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginBottom: values.length ? '8px' : '0' }}>
+          {values.map(v => (
+            <span key={v} style={{ display:'inline-flex', alignItems:'center', gap:'4px', background:'var(--bg-elev)', border:'1px solid var(--line)', borderRadius:'6px', padding:'3px 8px', fontSize:'12px', fontFamily:'var(--font-mono)' }}>
+              {v}
+              <button onClick={() => remove(v)} style={{ background:'none', border:'none', color:'var(--ink-mute)', cursor:'pointer', padding:'0', lineHeight:1, fontSize:'11px' }}>✕</button>
+            </span>
+          ))}
+        </div>
+        {/* Input row */}
+        <div style={{ display:'flex', gap:'6px' }}>
+          <input value={draft} onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => { if (e.key==='Enter' || e.key===',') { e.preventDefault(); add(draft); } }}
+            placeholder="أضف…" style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'var(--ink)', fontSize:'13px', padding:'2px 0', minWidth:0 }} />
+          <button onClick={() => add(draft)} style={{ background:'var(--accent)', border:'none', color:'#000', borderRadius:'6px', width:'24px', height:'24px', fontSize:'16px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, lineHeight:1, fontWeight:700 }}>+</button>
+        </div>
+        {/* Quick suggestions */}
+        {suggestions.length > 0 && (
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', marginTop:'8px', paddingTop:'8px', borderTop:'1px solid var(--line)' }}>
+            {suggestions.filter(s => !values.includes(s)).map(s => (
+              <button key={s} onClick={() => onChange([...values, s])} style={{ background:'transparent', border:'1px solid var(--line)', color:'var(--ink-mute)', borderRadius:'5px', padding:'2px 8px', fontSize:'11px', cursor:'pointer', fontFamily:'var(--font-mono)' }}>{s}</button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
