@@ -20,6 +20,7 @@ TOKEN_HOURS = 48
 DB_PATH     = Path(os.environ.get("NOIR_DB_PATH", str(Path(__file__).parent / "noir.db")))
 ADMIN_EMAIL = os.environ.get("NOIR_ADMIN_EMAIL", "admin@noir.com")
 ADMIN_PASS  = os.environ.get("NOIR_ADMIN_PASS",  "admin2026")
+ADMIN_UUID  = "00000000-noir-adm1-0000-000000000001"
 
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer  = HTTPBearer(auto_error=False)
@@ -159,11 +160,10 @@ def init_db():
         )
     if not c.execute("SELECT 1 FROM promo_codes LIMIT 1").fetchone():
         c.executemany("INSERT OR IGNORE INTO promo_codes (code,pct) VALUES (?,?)", SEED_PROMOS)
-    if not c.execute("SELECT 1 FROM users WHERE is_admin=1 LIMIT 1").fetchone():
-        c.execute(
-            "INSERT OR IGNORE INTO users (id,email,password,name,is_admin,created) VALUES (?,?,?,?,1,?)",
-            (str(uuid.uuid4()), ADMIN_EMAIL, pwd_ctx.hash(ADMIN_PASS), "Admin", datetime.utcnow().isoformat())
-        )
+    c.execute(
+        "INSERT OR IGNORE INTO users (id,email,password,name,is_admin,created) VALUES (?,?,?,?,1,?)",
+        (ADMIN_UUID, ADMIN_EMAIL, pwd_ctx.hash(ADMIN_PASS), "Admin", datetime.utcnow().isoformat())
+    )
     conn.commit()
     conn.close()
 
