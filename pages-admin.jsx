@@ -119,11 +119,15 @@ function AdminPage({ lang, user, onLogout, setPage }) {
     } catch (e) { showToast('✗ ' + e.message); }
   };
   const toggleCollection = async (cat) => {
+    const next = cat.is_collection ? 0 : 1;
+    setCategories(cs => cs.map(c => c.id === cat.id ? {...c, is_collection: next} : c));
     try {
-      await apiCall('PUT', `/api/admin/categories/${cat.id}`, { ...cat, is_collection: cat.is_collection ? 0 : 1 });
-      showToast(cat.is_collection ? 'تم الإزالة من التشكيلات' : '✓ تم الإضافة للتشكيلات');
-      loadCategories();
-    } catch (e) { showToast('✗ ' + e.message); }
+      await apiCall('PUT', `/api/admin/categories/${cat.id}`, { ...cat, is_collection: next });
+      showToast(next ? '✓ تم الإضافة للتشكيلات' : 'تم الإزالة من التشكيلات');
+    } catch (e) {
+      setCategories(cs => cs.map(c => c.id === cat.id ? {...c, is_collection: cat.is_collection} : c));
+      showToast('✗ ' + e.message);
+    }
   };
   const deleteCat = async (id, name) => {
     if (!confirm(`حذف "${name}"?`)) return;
