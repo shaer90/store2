@@ -4,7 +4,9 @@ const { useState: uS, useEffect: uE } = React;
 
 function detectInitialMode() {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  return isStandalone ? 'app' : 'web';
+  if (isStandalone) return 'app';
+  if (window.innerWidth < 768) return 'app'; // mobile browser → app UI + install prompt
+  return 'web';
 }
 
 function App() {
