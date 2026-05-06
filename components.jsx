@@ -156,19 +156,43 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
 
       {/* Side drawer */}
       <div style={{
-        position:'fixed', top:0, insetInlineStart:0, height:'100%', width:'72vw', maxWidth:'300px',
-        background:'var(--bg-elev)', zIndex:1001, display:'flex', flexDirection:'column',
+        position:'fixed', top:0, insetInlineStart:0, height:'100%', width:'80vw', maxWidth:'320px',
+        background:'var(--bg)', zIndex:1001, display:'flex', flexDirection:'column',
         transform: menuOpen ? 'translateX(0)' : (lang==='ar' ? 'translateX(110%)' : 'translateX(-110%)'),
         transition:'transform .35s cubic-bezier(0.175,0.885,0.32,1.1)',
         paddingTop:'env(safe-area-inset-top)',
       }}>
-        {/* Drawer header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'16px 16px 8px' }}>
+        {/* Close button */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'14px 14px 4px' }}>
           <button className="iconbtn" onClick={close}><Icon name="close" size={18} /></button>
         </div>
 
+        {/* Action icons row (cart, wish, lang) */}
+        <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 16px 20px' }}>
+          <button onClick={() => { onCart&&onCart(); close(); }} style={{
+            flex:1, aspectRatio:'1', background:'var(--bg-elev)', border:'none', borderRadius:'18px',
+            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+            gap:'6px', cursor:'pointer', position:'relative', color:'var(--ink)',
+          }}>
+            <Icon name="bag" size={26} />
+            {cartCount > 0 && <span className="badge" style={{ position:'absolute', top:'10px', insetInlineEnd:'10px' }}>{cartCount}</span>}
+          </button>
+          <button onClick={() => { onWish&&onWish(); close(); }} style={{
+            flex:1, aspectRatio:'1', background:'var(--bg-elev)', border:'none', borderRadius:'18px',
+            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+            gap:'6px', cursor:'pointer', position:'relative', color:'var(--ink)',
+          }}>
+            <Icon name="heart" size={26} />
+            {wishCount > 0 && <span className="badge" style={{ position:'absolute', top:'10px', insetInlineEnd:'10px' }}>{wishCount}</span>}
+          </button>
+          <div className="langtoggle" style={{ flex:1, height:'100%', aspectRatio:'1', borderRadius:'18px', background:'var(--bg-elev)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
+            <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
+          </div>
+        </div>
+
         {/* Nav links */}
-        <div style={{ flex:1, overflowY:'auto' }}>
+        <div style={{ flex:1, overflowY:'auto', borderTop:'1px solid var(--line)' }}>
           {navLinks.map((l, i) => (
             <button key={i} onClick={l.action} style={{
               display:'block', width:'100%', textAlign: lang==='ar' ? 'right' : 'left',
@@ -178,39 +202,36 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
               {lang==='ar' ? l.ar : l.en}
             </button>
           ))}
-
-          {/* Search */}
-          <button onClick={() => { setPage&&setPage('search'); close(); }} style={{
-            display:'flex', alignItems:'center', gap:'10px', width:'100%',
-            textAlign: lang==='ar' ? 'right' : 'left', padding:'15px 24px',
-            background:'none', border:'none', borderBottom:'1px solid var(--line)',
-            color:'var(--ink-mute)', fontSize:'14px', cursor:'pointer',
-          }}>
-            <Icon name="search" size={16} /> {lang==='ar' ? 'بحث' : 'Search'}
-          </button>
-
-          {/* Account */}
-          <button onClick={() => { onAccount&&onAccount(); close(); }} style={{
-            display:'flex', alignItems:'center', gap:'10px', width:'100%',
-            textAlign: lang==='ar' ? 'right' : 'left', padding:'15px 24px',
-            background:'none', border:'none', borderBottom:'1px solid var(--line)',
-            color:'var(--ink-mute)', fontSize:'14px', cursor:'pointer',
-          }}>
-            <Icon name="user" size={16} /> {lang==='ar' ? 'حسابي' : 'My Account'}
-          </button>
         </div>
 
-        {/* Footer: lang + theme */}
-        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--line)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div className="langtoggle">
-            <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
-            <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
-          </div>
-          {setTheme && (
+        {/* Bottom nav strip */}
+        <div style={{ display:'flex', borderTop:'1px solid var(--line)', paddingBottom:'env(safe-area-inset-bottom)' }}>
+          {[
+            { icon:'home',   ar:'الرئيسية', en:'Home',    action:() => { setPage&&setPage('home'); close(); } },
+            { icon:'shop',   ar:'التسوق',   en:'Shop',    action:() => { setPage&&setPage('shop'); close(); } },
+            { icon:'search', ar:'البحث',    en:'Search',  action:() => { setPage&&setPage('search'); close(); } },
+            { icon:'heart',  ar:'WISH',     en:'WISH',    action:() => { setPage&&setPage('wish'); close(); } },
+            { icon:'user',   ar:'حسابي',    en:'Account', action:() => { onAccount&&onAccount(); close(); } },
+          ].map((it, i) => (
+            <button key={i} onClick={it.action} style={{
+              flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+              gap:'4px', padding:'12px 0', background:'none', border:'none', cursor:'pointer',
+              color:'var(--ink-mute)', fontSize:'10px',
+            }}>
+              <Icon name={it.icon} size={20} />
+              <span>{lang==='ar' ? it.ar : it.en}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Theme toggle */}
+        {setTheme && (
+          <div style={{ padding:'10px 16px', borderTop:'1px solid var(--line)', display:'flex', justifyContent:'flex-end' }}>
             <button className="iconbtn" onClick={() => setTheme(theme==='dark'?'light':'dark')} style={{ fontSize:'16px' }}>
               {theme==='dark' ? '☀' : '☾'}
             </button>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </>
