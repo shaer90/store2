@@ -146,6 +146,7 @@ function App() {
         cartCount={cartCount} wishCount={store.wish.length}
         setPage={setPage} setShopFilter={setShopFilter}
         theme={theme} setTheme={setTheme}
+        isStandalone={window.navigator.standalone || window.matchMedia('(display-mode:standalone)').matches}
         onInstall={!window.navigator.standalone && !window.matchMedia('(display-mode:standalone)').matches ? triggerInstall : null} />;
 
   if (activeProduct) {

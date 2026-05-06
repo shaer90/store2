@@ -111,10 +111,28 @@ function ProductCard({ p, lang, onOpen, isWished, onWish, idx }) {
 }
 
 // =============== Top bar ===============
-function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount, onInstall, setPage, setShopFilter, theme, setTheme }) {
+function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount, onInstall, setPage, setShopFilter, theme, setTheme, isStandalone }) {
   const t = window.NOIR_I18N[lang];
   const [menuOpen, setMenuOpen] = React.useState(false);
   const close = () => setMenuOpen(false);
+
+  // PWA installed → simple bar, no drawer
+  if (isStandalone) return (
+    <div className="topbar">
+      <span className="logo"><span className="dot"></span>NOIR</span>
+      <div className="spacer"></div>
+      <div className="langtoggle">
+        <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
+        <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
+      </div>
+      <button className="iconbtn" onClick={onWish} aria-label="wishlist">
+        <Icon name="heart" />{wishCount > 0 && <span className="badge">{wishCount}</span>}
+      </button>
+      <button className="iconbtn" onClick={onCart} aria-label="bag">
+        <Icon name="bag" />{cartCount > 0 && <span className="badge">{cartCount}</span>}
+      </button>
+    </div>
+  );
 
   const navLinks = [
     { ar: 'الرئيسية',   en: 'Home',        action: () => { setPage&&setPage('home'); close(); } },
