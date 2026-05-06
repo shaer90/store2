@@ -162,7 +162,7 @@ function App() {
           showToast={showToast} />
         {mode === 'web' && <WebFooter lang={lang} setLang={switchLang} />}
         {toastNode}
-        {mode === 'app' && <BottomNav page={page} setPage={(p) => { closeProduct(); setPage(p); }} lang={lang} />}
+        {mode === 'app' && (window.navigator.standalone || window.matchMedia('(display-mode:standalone)').matches) && <BottomNav page={page} setPage={(p) => { closeProduct(); setPage(p); }} lang={lang} />}
         {mode === 'app' && <div className="device-label">NOIR · PWA · Installed</div>}
       </div>
     );
@@ -259,7 +259,7 @@ function App() {
           ⚙ لوحة التحكم
         </button>
       )}
-      {mode === 'app' && <BottomNav page={page} setPage={setPage} lang={lang} />}
+      {mode === 'app' && (window.navigator.standalone || window.matchMedia('(display-mode:standalone)').matches) && <BottomNav page={page} setPage={setPage} lang={lang} />}
       {mode === 'app' && <div className="device-label">NOIR · PWA · Installed</div>}
       {androidHint && (
         <div style={{ position:'fixed', bottom:'80px', left:'50%', transform:'translateX(-50%)', background:'var(--bg-elev-2)', border:'1px solid var(--line)', borderRadius:'16px', padding:'18px 20px', maxWidth:'320px', width:'calc(100% - 40px)', zIndex:9999, boxShadow:'0 8px 40px rgba(0,0,0,0.4)', textAlign:'center' }}>
