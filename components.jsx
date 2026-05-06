@@ -159,14 +159,6 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
             ↓ {lang === 'ar' ? 'حمّل التطبيق' : 'Install App'}
           </button>
         )}
-        <button className="iconbtn" onClick={onWish} aria-label="wishlist">
-          <Icon name="heart" />
-          {wishCount > 0 && <span className="badge">{wishCount}</span>}
-        </button>
-        <button className="iconbtn" onClick={onCart} aria-label="bag">
-          <Icon name="bag" />
-          {cartCount > 0 && <span className="badge">{cartCount}</span>}
-        </button>
       </div>
 
       {/* Backdrop */}
