@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: noir-store
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NOIR_SECRET_KEY
+        generateValue: true
+      - key: NOIR_ADMIN_EMAIL
+        value: admin@noir.com
+      - key: NOIR_ADMIN_PASS
+        value: admin2026

@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-SECRET_KEY  = "noir-secret-key-change-in-prod"
+SECRET_KEY  = os.environ.get("NOIR_SECRET_KEY", "noir-secret-key-change-in-prod")
 ALGORITHM   = "HS256"
 TOKEN_HOURS = 48
 DB_PATH     = Path(os.environ.get("NOIR_DB_PATH", str(Path(__file__).parent / "noir.db")))
@@ -146,7 +146,17 @@ def init_db():
         "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE orders ADD COLUMN notes TEXT",
         "ALTER TABLE products ADD COLUMN featured INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN active INTEGER NOT NULL DEFAULT 1",
+        "ALTER TABLE products ADD COLUMN meta_ar TEXT NOT NULL DEFAULT ''",
+        "ALTER TABLE products ADD COLUMN meta_en TEXT NOT NULL DEFAULT ''",
+        "ALTER TABLE products ADD COLUMN created TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "ALTER TABLE products ADD COLUMN color TEXT NOT NULL DEFAULT 'ink'",
+        "ALTER TABLE products ADD COLUMN was REAL",
+        "ALTER TABLE products ADD COLUMN tag TEXT",
+        "ALTER TABLE products ADD COLUMN sizes TEXT",
+        "ALTER TABLE products ADD COLUMN colors TEXT",
         "ALTER TABLE categories ADD COLUMN is_collection INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE product_images ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0",
     ]:
         try: c.execute(stmt); conn.commit()
         except: pass
@@ -540,6 +550,28 @@ def admin_list_users(admin=Depends(get_admin_user), db=Depends(get_db)):
         "SELECT u.id,u.email,u.name,u.is_admin,u.created,COUNT(o.id) as orders_count FROM users u LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.created DESC"
     ).fetchall()
     return {"users": [dict(r) for r in rows]}
+
+# ── Hero images (public read, admin write) ─────────────────────────────────
+HERO_ID = "_hero"
+
+@app.get("/api/hero")
+def get_hero_images(db=Depends(get_db)):
+    rows = db.execute("SELECT id,data,is_primary,sort_order FROM product_images WHERE product_id=? ORDER BY sort_order,id", (HERO_ID,)).fetchall()
+    return {"images": [dict(r) for r in rows]}
+
+@app.post("/api/admin/hero", status_code=201)
+def admin_upload_hero(body: ImageBody, admin=Depends(get_admin_user), db=Depends(get_db)):
+    iid = str(uuid.uuid4())
+    has_any = db.execute("SELECT 1 FROM product_images WHERE product_id=? LIMIT 1", (HERO_ID,)).fetchone()
+    db.execute("INSERT INTO product_images (id,product_id,data,is_primary,sort_order) VALUES (?,?,?,?,?)",
+               (iid, HERO_ID, body.data, 0 if has_any else 1, 0))
+    db.commit()
+    return {"id": iid}
+
+@app.delete("/api/admin/hero/{iid}")
+def admin_delete_hero(iid: str, admin=Depends(get_admin_user), db=Depends(get_db)):
+    db.execute("DELETE FROM product_images WHERE id=? AND product_id=?", (iid, HERO_ID))
+    db.commit(); return {"ok": True}
 
 # ── Static ─────────────────────────────────────────────────────────────────
 static_dir = Path(__file__).parent

@@ -470,16 +470,6 @@ function LoginPage({ lang, onLogin }) {
           {!loading && <Icon name="arrow" size={16} />}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0', color: 'var(--ink-mute)', fontSize: '11px', fontFamily: 'var(--font-mono)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-          <span style={{ flex: 1, height: '1px', background: 'var(--line)' }}></span>
-          {t['login.or']}
-          <span style={{ flex: 1, height: '1px', background: 'var(--line)' }}></span>
-        </div>
-
-        <div className="col">
-          <button className="btn btn-ghost btn-block" style={{ opacity: 0.5, cursor: 'not-allowed' }}><Icon name="apple" size={18} /> {t['login.apple']}</button>
-          <button className="btn btn-ghost btn-block" style={{ opacity: 0.5, cursor: 'not-allowed' }}><Icon name="google" size={18} /> {t['login.google']}</button>
-        </div>
       </div>
     </div>
   );

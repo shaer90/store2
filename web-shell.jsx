@@ -1,17 +1,24 @@
 // NOIR — Web variant: top nav, footer, newsletter, USP strip
 
-function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall, setShopFilter, theme, setTheme }) {
+function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall, setShopFilter, shopFilter, theme, setTheme }) {
   const t = window.NOIR_I18N[lang];
   const links = [
-    { id: 'home',       ar: 'الرئيسية',   en: 'Home',        filter: null },
-    { id: 'shop',       ar: 'التسوق',     en: 'Shop',        filter: null },
+    { id: 'home',       ar: 'الرئيسية',   en: 'Home',        filter: null, isHome: true },
     { id: 'shop-women', ar: 'نسائي',      en: 'Women',       filter: { cat: 'dresses' } },
-    { id: 'shop-men',   ar: 'رجالي',      en: 'Men',         filter: { cat: 'outer' } },
+    { id: 'shop-men',   ar: 'رجالي',      en: 'Men',         filter: { cat: 'tops' } },
+    { id: 'shop-kids',  ar: 'أطفال',      en: 'Kids',        filter: { cat: 'kids' } },
     { id: 'shop-new',   ar: 'وصل حديثاً', en: 'New',         filter: { tag: 'new' } },
     { id: 'shop-sale',  ar: 'تخفيضات',   en: 'Sale',        filter: { tag: 'sale' } },
   ];
+  const isActive = (l) => {
+    if (l.isHome) return page === 'home';
+    if (page !== 'shop') return false;
+    if (!l.filter && !shopFilter) return true;
+    if (!l.filter || !shopFilter) return false;
+    return l.filter.cat === shopFilter.cat && l.filter.tag === shopFilter.tag;
+  };
   const goTo = (l) => {
-    if (l.id === 'home') { setPage('home'); return; }
+    if (l.isHome) { setPage('home'); return; }
     if (setShopFilter) setShopFilter(l.filter || null);
     setPage('shop');
   };
@@ -22,7 +29,7 @@ function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall,
       </span>
       <div className="links">
         {links.map(l => (
-          <a key={l.id} className={page===l.id || (l.id.startsWith('shop')&&page==='shop')?'active':''} onClick={() => goTo(l)}>
+          <a key={l.id} className={isActive(l) ? 'active' : ''} onClick={() => goTo(l)}>
             {lang==='ar'?l.ar:l.en}
           </a>
         ))}

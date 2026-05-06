@@ -4,6 +4,16 @@
 function HomePage({ lang, products, categories, wish, toggleWish, openProduct, setPage, setShopFilter }) {
   const t = window.NOIR_I18N[lang];
   const featured = products.filter(p => p.featured).slice(0, 8);
+  const [heroImgs, setHeroImgs] = React.useState([]);
+  const [heroIdx, setHeroIdx] = React.useState(0);
+  React.useEffect(() => {
+    fetch('/api/hero').then(r => r.ok ? r.json() : null).then(d => { if (d?.images?.length) setHeroImgs(d.images); }).catch(() => {});
+  }, []);
+  React.useEffect(() => {
+    if (heroImgs.length < 2) return;
+    const timer = setInterval(() => setHeroIdx(i => (i + 1) % heroImgs.length), 4000);
+    return () => clearInterval(timer);
+  }, [heroImgs.length]);
   const justLanded = products.filter(p => p.tag === 'new');
   const collectionCats = (categories || []).filter(c => c.is_collection);
   const collections = collectionCats.length > 0
@@ -46,8 +56,25 @@ function HomePage({ lang, products, categories, wish, toggleWish, openProduct, s
         </div>
         <div className="hero-art">
           <div className="grain"></div>
-          <div className="hero-orb"></div>
-          <div className="placeholder">FW26 · Hero shot</div>
+          {heroImgs.length > 0 ? (
+            <>
+              {heroImgs.map((img, i) => (
+                <img key={img.id} src={img.data} style={{
+                  position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', borderRadius:'inherit',
+                  opacity: i === heroIdx ? 1 : 0, transition:'opacity 0.8s ease',
+                }} />
+              ))}
+              {heroImgs.length > 1 && (
+                <div style={{ position:'absolute', bottom:'48px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'6px', zIndex:3 }}>
+                  {heroImgs.map((_, i) => (
+                    <button key={i} onClick={() => setHeroIdx(i)} style={{ width: i===heroIdx?'20px':'6px', height:'6px', borderRadius:'3px', background: i===heroIdx?'var(--accent)':'rgba(255,255,255,.4)', border:'none', cursor:'pointer', transition:'all .3s', padding:0 }} />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <><div className="hero-orb"></div><div className="placeholder">FW26 · Hero shot</div></>
+          )}
           <div className="hero-marquee">
             <div className="hero-marquee-track">
               <span>NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR · NOIR ·&nbsp;</span>
@@ -57,7 +84,7 @@ function HomePage({ lang, products, categories, wish, toggleWish, openProduct, s
         </div>
       </section>
 
-      <div className="divider">
+      <div className="divider reveal">
         <span className="label">01 — {t['home.featured']}</span>
         <span className="line"></span>
       </div>
@@ -70,7 +97,7 @@ function HomePage({ lang, products, categories, wish, toggleWish, openProduct, s
         ))}
       </div>
 
-      <div className="divider">
+      <div className="divider reveal">
         <span className="label">02 — {t['home.collections']}</span>
         <span className="line"></span>
       </div>
@@ -78,7 +105,6 @@ function HomePage({ lang, products, categories, wish, toggleWish, openProduct, s
         {collections.map((c, i) => (
           <div key={c.id}
             className="card"
-            style={{ animationDelay: `${i*60}ms` }}
             onClick={() => { setShopFilter({ cat: c.id }); setPage('shop'); }}>
             <div className="card-img" style={{ aspectRatio: '1' }}>
               <div className={`swatch bg-${c.color}`}></div>

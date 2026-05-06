@@ -7,6 +7,7 @@ function AdminPage({ lang, user, onLogout, setPage }) {
   const [categories, setCategories] = React.useState([]);
   const [orders, setOrders]     = React.useState([]);
   const [promos, setPromos]     = React.useState([]);
+  const [heroImgs, setHeroImgs] = React.useState([]);
   const [orderFilter, setOrderFilter] = React.useState('all');
   const [pSearch, setPSearch]   = React.useState('');
   const [editProduct, setEditProduct] = React.useState(null);
@@ -37,6 +38,7 @@ function AdminPage({ lang, user, onLogout, setPage }) {
     if (tab === 'categories') loadCategories();
     if (tab === 'orders')     loadOrders();
     if (tab === 'promos')     loadPromos();
+    if (tab === 'hero')       loadHeroImgs();
   }, [tab]);
 
   React.useEffect(() => { if (tab === 'orders') loadOrders(); }, [orderFilter]);
@@ -46,6 +48,16 @@ function AdminPage({ lang, user, onLogout, setPage }) {
   const loadCategories = async () => { try { setCategories((await apiCall('GET', '/api/admin/categories')).categories); } catch {} };
   const loadOrders     = async () => { try { setOrders((await apiCall('GET', `/api/admin/orders?status_filter=${orderFilter}`)).orders); } catch {} };
   const loadPromos     = async () => { try { setPromos((await apiCall('GET', '/api/admin/promos')).promos); } catch {} };
+  const loadHeroImgs   = async () => { try { const d = await apiCall('GET', '/api/hero'); if (Array.isArray(d?.images)) setHeroImgs(d.images); } catch {} };
+  const uploadHeroImg  = async (file) => {
+    let data; try { data = await compressImg(file, 1200); } catch(e) { showToast('✗ ' + e.message); return; }
+    try { const r = await apiCall('POST', '/api/admin/hero', { data }); setHeroImgs(imgs => [...imgs, { id: r.id, data }]); showToast('✓ تم رفع الصورة'); }
+    catch(e) { showToast('✗ ' + e.message); }
+  };
+  const deleteHeroImg  = async (id) => {
+    try { await apiCall('DELETE', `/api/admin/hero/${id}`); setHeroImgs(imgs => imgs.filter(i => i.id !== id)); showToast('✓ تم الحذف'); }
+    catch(e) { showToast('✗ ' + e.message); }
+  };
 
   // ── Products ──────────────────────────────────────────────────────────────
   const openNewProduct = () => {
@@ -165,6 +177,7 @@ function AdminPage({ lang, user, onLogout, setPage }) {
 
   const TABS = [
     { id:'dashboard', ar:'الرئيسية', ico:'📊' },
+    { id:'hero',      ar:'الهيرو',   ico:'🖼' },
     { id:'products',  ar:'المنتجات', ico:'👕' },
     { id:'categories',ar:'الأقسام',  ico:'🗂' },
     { id:'orders',    ar:'الطلبات',  ico:'📦' },
@@ -240,6 +253,30 @@ function AdminPage({ lang, user, onLogout, setPage }) {
               </div>
             </>
           ) : <div style={{ textAlign:'center', color:'var(--ink-mute)', padding:'40px' }}>جاري التحميل…</div>}
+        </div>
+      )}
+
+      {/* ── HERO ── */}
+      {tab === 'hero' && (
+        <div>
+          <div style={{ fontSize:'13px', color:'var(--ink-mute)', marginBottom:'16px', lineHeight:1.6 }}>
+            صور الصفحة الرئيسية — تتبدل تلقائياً كل 4 ثواني. الحجم المثالي: عريض (3:2 أو 16:9).
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', marginBottom:'16px' }}>
+            {(heroImgs || []).map((img, i) => (
+              <div key={img.id} style={{ position:'relative', width:'140px', height:'90px', borderRadius:'12px', overflow:'hidden', flexShrink:0, border:'1px solid var(--line)' }}>
+                <img src={img.data} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                {i === 0 && <div style={{ position:'absolute', top:'4px', insetInlineStart:'4px', background:'var(--accent)', color:'#000', fontSize:'9px', fontWeight:'700', borderRadius:'4px', padding:'2px 6px' }}>رئيسية</div>}
+                <button onClick={() => deleteHeroImg(img.id)} style={{ position:'absolute', top:'4px', insetInlineEnd:'4px', background:'rgba(0,0,0,.7)', color:'#fff', border:'none', borderRadius:'6px', fontSize:'12px', padding:'2px 7px', cursor:'pointer' }}>✕</button>
+              </div>
+            ))}
+            <label style={{ width:'140px', height:'90px', borderRadius:'12px', border:'2px dashed var(--line)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'6px', color:'var(--ink-mute)', cursor:'pointer', background:'var(--bg-elev)', flexShrink:0 }}>
+              <span style={{ fontSize:'28px', lineHeight:1 }}>+</span>
+              <span style={{ fontSize:'11px' }}>رفع صورة</span>
+              <input type="file" accept="image/*" multiple style={{ display:'none' }} onChange={async e => { for (const f of e.target.files) await uploadHeroImg(f); e.target.value=''; }} />
+            </label>
+          </div>
+          {heroImgs.length === 0 && <div style={{ textAlign:'center', color:'var(--ink-mute)', padding:'20px', fontSize:'13px' }}>لا توجد صور بعد</div>}
         </div>
       )}
 

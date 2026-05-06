@@ -17,7 +17,9 @@ function App() {
   const [installShown, setInstallShown] = uS(false);
   const [installDismissed, setInstallDismissed] = uS(false);
   const [authed, setAuthed] = uS(() => localStorage.getItem('noir.auth') === '1' || !!(window.NOIR_API && window.NOIR_API.hasToken()));
-  const [user, setUser] = uS(null);
+  const [user, setUser] = uS(() => {
+    try { const u = localStorage.getItem('noir.user'); return u ? JSON.parse(u) : null; } catch { return null; }
+  });
   const [installing, setInstalling] = uS(false);
   const [theme, setTheme] = uS(() => localStorage.getItem('noir.theme') || 'dark');
   const [deferredPrompt, setDeferredPrompt] = uS(null);
@@ -65,6 +67,12 @@ function App() {
     setInstalling(false);
     setPage('home');
   };
+
+  uE(() => {
+    if (authed && window.NOIR_API.hasToken() && !user) {
+      window.NOIR_API.me().then(u => setUser(u)).catch(() => {});
+    }
+  }, [authed]);
 
   const [products, setProducts] = uS(window.NOIR_PRODUCTS || []);
   const [categories, setCategories] = uS([]);
@@ -130,7 +138,7 @@ function App() {
   const cartCount = store.cart.reduce((s, c) => s + c.qty, 0);
 
   const headerNode = mode === 'web'
-    ? <WebNav lang={lang} setLang={switchLang} page={page} setPage={setPage} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} setShopFilter={setShopFilter} theme={theme} setTheme={setTheme} />
+    ? <WebNav lang={lang} setLang={switchLang} page={page} setPage={setPage} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} setShopFilter={setShopFilter} shopFilter={shopFilter} theme={theme} setTheme={setTheme} />
     : <TopBar lang={lang} setLang={switchLang}
         onCart={() => setPage('cart')} onWish={() => setPage('wish')} onAccount={() => setPage('account')}
         cartCount={cartCount} wishCount={store.wish.length} />;
@@ -210,8 +218,8 @@ function App() {
       <div className={`page ${page==='account'?'active':''}`}>
         {page === 'account' && (
           <AccountPage lang={lang} orders={store.orders} isAuthed={authed} user={user} setPage={setPage}
-            onLogin={(u) => { localStorage.setItem('noir.auth','1'); setAuthed(true); if(u) setUser(u); }}
-            onLogout={() => { localStorage.removeItem('noir.auth'); window.NOIR_API.clearToken(); setAuthed(false); setUser(null); }} />
+            onLogin={(u) => { localStorage.setItem('noir.auth','1'); setAuthed(true); if(u) { setUser(u); localStorage.setItem('noir.user', JSON.stringify(u)); } }}
+            onLogout={() => { localStorage.removeItem('noir.auth'); localStorage.removeItem('noir.user'); window.NOIR_API.clearToken(); setAuthed(false); setUser(null); }} />
         )}
       </div>
 
@@ -235,6 +243,16 @@ function App() {
       )}
 
       {mode === 'web' && <WebBottomNav page={page} setPage={setPage} lang={lang} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} />}
+      {user?.is_admin && page !== 'account' && (
+        <button onClick={() => setPage('account')} style={{
+          position:'fixed', bottom: mode==='web'?'80px':'90px', insetInlineStart:'18px',
+          background:'var(--accent)', color:'#000', border:'none', borderRadius:'var(--radius-pill)',
+          padding:'10px 16px', fontSize:'12px', fontWeight:'700', cursor:'pointer', zIndex:900,
+          boxShadow:'0 4px 20px rgba(232,255,90,0.35)', display:'flex', alignItems:'center', gap:'6px',
+        }}>
+          ⚙ لوحة التحكم
+        </button>
+      )}
       {mode === 'app' && <BottomNav page={page} setPage={setPage} lang={lang} />}
       {mode === 'app' && <div className="device-label">NOIR · PWA · Installed</div>}
       {androidHint && (
