@@ -92,7 +92,7 @@
   function initCardTilt() {
     const MAX = 8; // max degrees
     document.addEventListener('mousemove', e => {
-      if (!e.target?.closest) return;
+      if (!e.target || typeof e.target.closest !== 'function') return;
       const card = e.target.closest('.card');
       if (!card) return;
       const r = card.getBoundingClientRect();
@@ -104,7 +104,7 @@
       if (img) img.style.transform = `scale(1.04) translate(${x*6}px,${y*6}px)`;
     });
     document.addEventListener('mouseleave', e => {
-      if (!e.target?.closest) return;
+      if (!e.target || typeof e.target.closest !== 'function') return;
       const card = e.target.closest('.card');
       if (!card) return;
       card.style.transform = '';
@@ -283,7 +283,7 @@
     new MutationObserver(muts => {
       muts.forEach(m => m.addedNodes.forEach(n => {
         if (!n.querySelectorAll) return;
-        if (n.classList?.contains('card')) register(n, 0);
+        if (n.classList && n.classList.contains('card')) register(n, 0);
         else n.querySelectorAll('.card').forEach((c, i) => register(c, i));
       }));
     }).observe(document.body, { childList: true, subtree: true });
