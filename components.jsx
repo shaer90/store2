@@ -250,7 +250,6 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
             </button>
           </div>
         )}
-        </div>
       </div>
     </>
   );
