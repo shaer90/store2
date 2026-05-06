@@ -144,6 +144,8 @@ function App() {
     : <TopBar lang={lang} setLang={switchLang}
         onCart={() => setPage('cart')} onWish={() => setPage('wish')} onAccount={() => setPage('account')}
         cartCount={cartCount} wishCount={store.wish.length}
+        setPage={setPage} setShopFilter={setShopFilter}
+        theme={theme} setTheme={setTheme}
         onInstall={!window.navigator.standalone && !window.matchMedia('(display-mode:standalone)').matches ? triggerInstall : null} />;
 
   if (activeProduct) {

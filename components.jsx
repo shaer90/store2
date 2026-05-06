@@ -111,35 +111,109 @@ function ProductCard({ p, lang, onOpen, isWished, onWish, idx }) {
 }
 
 // =============== Top bar ===============
-function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount, onInstall }) {
+function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount, onInstall, setPage, setShopFilter, theme, setTheme }) {
   const t = window.NOIR_I18N[lang];
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const close = () => setMenuOpen(false);
+
+  const navLinks = [
+    { ar: 'الرئيسية',   en: 'Home',        action: () => { setPage&&setPage('home'); close(); } },
+    { ar: 'نسائي',      en: 'Women',       action: () => { setShopFilter&&setShopFilter({cat:'dresses'}); setPage&&setPage('shop'); close(); } },
+    { ar: 'رجالي',      en: 'Men',         action: () => { setShopFilter&&setShopFilter({cat:'tops'});    setPage&&setPage('shop'); close(); } },
+    { ar: 'أطفال',      en: 'Kids',        action: () => { setShopFilter&&setShopFilter({cat:'kids'});    setPage&&setPage('shop'); close(); } },
+    { ar: 'وصل حديثاً', en: 'New In',      action: () => { setShopFilter&&setShopFilter({tag:'new'});     setPage&&setPage('shop'); close(); } },
+    { ar: 'تخفيضات',   en: 'Sale',        action: () => { setShopFilter&&setShopFilter({tag:'sale'});    setPage&&setPage('shop'); close(); } },
+  ];
+
   return (
-    <div className="topbar">
-      <span className="logo"><span className="dot"></span>NOIR</span>
-      <div className="spacer"></div>
-      {onInstall && (
-        <button onClick={onInstall} style={{
-          background:'var(--accent)', color:'#000', border:'none',
-          borderRadius:'var(--radius-pill)', padding:'7px 14px',
-          fontSize:'12px', fontWeight:'700', cursor:'pointer',
-          display:'flex', alignItems:'center', gap:'5px', whiteSpace:'nowrap',
-        }}>
-          ↓ {lang === 'ar' ? 'حمّل التطبيق' : 'Install App'}
+    <>
+      <div className="topbar">
+        <button className="iconbtn" onClick={() => setMenuOpen(true)} aria-label="menu" style={{ fontSize:'18px' }}>☰</button>
+        <span className="logo" style={{ cursor:'pointer' }} onClick={() => setPage&&setPage('home')}><span className="dot"></span>NOIR</span>
+        <div className="spacer"></div>
+        {onInstall && (
+          <button onClick={onInstall} style={{
+            background:'var(--accent)', color:'#000', border:'none',
+            borderRadius:'var(--radius-pill)', padding:'7px 14px',
+            fontSize:'12px', fontWeight:'700', cursor:'pointer',
+            display:'flex', alignItems:'center', gap:'5px', whiteSpace:'nowrap',
+          }}>
+            ↓ {lang === 'ar' ? 'حمّل التطبيق' : 'Install App'}
+          </button>
+        )}
+        <button className="iconbtn" onClick={onWish} aria-label="wishlist">
+          <Icon name="heart" />
+          {wishCount > 0 && <span className="badge">{wishCount}</span>}
         </button>
-      )}
-      <div className="langtoggle">
-        <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
-        <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
+        <button className="iconbtn" onClick={onCart} aria-label="bag">
+          <Icon name="bag" />
+          {cartCount > 0 && <span className="badge">{cartCount}</span>}
+        </button>
       </div>
-      <button className="iconbtn" onClick={onWish} aria-label="wishlist">
-        <Icon name="heart" />
-        {wishCount > 0 && <span className="badge">{wishCount}</span>}
-      </button>
-      <button className="iconbtn" onClick={onCart} aria-label="bag">
-        <Icon name="bag" />
-        {cartCount > 0 && <span className="badge">{cartCount}</span>}
-      </button>
-    </div>
+
+      {/* Backdrop */}
+      {menuOpen && <div onClick={close} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:1000 }} />}
+
+      {/* Side drawer */}
+      <div style={{
+        position:'fixed', top:0, insetInlineStart:0, height:'100%', width:'72vw', maxWidth:'300px',
+        background:'var(--bg-elev)', zIndex:1001, display:'flex', flexDirection:'column',
+        transform: menuOpen ? 'translateX(0)' : (lang==='ar' ? 'translateX(110%)' : 'translateX(-110%)'),
+        transition:'transform .35s cubic-bezier(0.175,0.885,0.32,1.1)',
+        paddingTop:'env(safe-area-inset-top)',
+      }}>
+        {/* Drawer header */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'16px 16px 8px' }}>
+          <button className="iconbtn" onClick={close}><Icon name="close" size={18} /></button>
+        </div>
+
+        {/* Nav links */}
+        <div style={{ flex:1, overflowY:'auto' }}>
+          {navLinks.map((l, i) => (
+            <button key={i} onClick={l.action} style={{
+              display:'block', width:'100%', textAlign: lang==='ar' ? 'right' : 'left',
+              padding:'15px 24px', background:'none', border:'none', borderBottom:'1px solid var(--line)',
+              color:'var(--ink)', fontSize:'16px', fontWeight:600, cursor:'pointer',
+            }}>
+              {lang==='ar' ? l.ar : l.en}
+            </button>
+          ))}
+
+          {/* Search */}
+          <button onClick={() => { setPage&&setPage('search'); close(); }} style={{
+            display:'flex', alignItems:'center', gap:'10px', width:'100%',
+            textAlign: lang==='ar' ? 'right' : 'left', padding:'15px 24px',
+            background:'none', border:'none', borderBottom:'1px solid var(--line)',
+            color:'var(--ink-mute)', fontSize:'14px', cursor:'pointer',
+          }}>
+            <Icon name="search" size={16} /> {lang==='ar' ? 'بحث' : 'Search'}
+          </button>
+
+          {/* Account */}
+          <button onClick={() => { onAccount&&onAccount(); close(); }} style={{
+            display:'flex', alignItems:'center', gap:'10px', width:'100%',
+            textAlign: lang==='ar' ? 'right' : 'left', padding:'15px 24px',
+            background:'none', border:'none', borderBottom:'1px solid var(--line)',
+            color:'var(--ink-mute)', fontSize:'14px', cursor:'pointer',
+          }}>
+            <Icon name="user" size={16} /> {lang==='ar' ? 'حسابي' : 'My Account'}
+          </button>
+        </div>
+
+        {/* Footer: lang + theme */}
+        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--line)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div className="langtoggle">
+            <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
+            <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
+          </div>
+          {setTheme && (
+            <button className="iconbtn" onClick={() => setTheme(theme==='dark'?'light':'dark')} style={{ fontSize:'16px' }}>
+              {theme==='dark' ? '☀' : '☾'}
+            </button>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 
