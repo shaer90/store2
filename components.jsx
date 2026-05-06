@@ -111,12 +111,22 @@ function ProductCard({ p, lang, onOpen, isWished, onWish, idx }) {
 }
 
 // =============== Top bar ===============
-function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount }) {
+function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount, onInstall }) {
   const t = window.NOIR_I18N[lang];
   return (
     <div className="topbar">
       <span className="logo"><span className="dot"></span>NOIR</span>
       <div className="spacer"></div>
+      {onInstall && (
+        <button onClick={onInstall} style={{
+          background:'var(--accent)', color:'#000', border:'none',
+          borderRadius:'var(--radius-pill)', padding:'7px 14px',
+          fontSize:'12px', fontWeight:'700', cursor:'pointer',
+          display:'flex', alignItems:'center', gap:'5px', whiteSpace:'nowrap',
+        }}>
+          ↓ {lang === 'ar' ? 'حمّل التطبيق' : 'Install App'}
+        </button>
+      )}
       <div className="langtoggle">
         <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
         <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>

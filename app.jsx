@@ -143,7 +143,8 @@ function App() {
     ? <WebNav lang={lang} setLang={switchLang} page={page} setPage={setPage} cartCount={cartCount} wishCount={store.wish.length} onInstall={triggerInstall} setShopFilter={setShopFilter} shopFilter={shopFilter} theme={theme} setTheme={setTheme} />
     : <TopBar lang={lang} setLang={switchLang}
         onCart={() => setPage('cart')} onWish={() => setPage('wish')} onAccount={() => setPage('account')}
-        cartCount={cartCount} wishCount={store.wish.length} />;
+        cartCount={cartCount} wishCount={store.wish.length}
+        onInstall={!window.navigator.standalone && !window.matchMedia('(display-mode:standalone)').matches ? triggerInstall : null} />;
 
   if (activeProduct) {
     return (
@@ -228,7 +229,7 @@ function App() {
       {mode === 'web' && page !== 'home' && page !== 'account' && <WebFooter lang={lang} setLang={switchLang} />}
       {mode === 'web' && page === 'home' && <WebFooter lang={lang} setLang={switchLang} />}
 
-      {installShown && !installDismissed && page !== 'cart' && (
+      {installShown && !installDismissed && page !== 'cart' && mode === 'web' && (
         <div className="install show">
           <div className="icon">N</div>
           <div className="body">
