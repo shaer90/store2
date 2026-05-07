@@ -195,10 +195,14 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
             <Icon name="heart" size={26} />
             {wishCount > 0 && <span className="badge" style={{ position:'absolute', top:'10px', insetInlineEnd:'10px' }}>{wishCount}</span>}
           </button>
-          <div className="langtoggle" style={{ flex:1, height:'100%', aspectRatio:'1', borderRadius:'18px', background:'var(--bg-elev)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
-            <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
-          </div>
+          <button onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} style={{
+            flex:1, aspectRatio:'1', background:'var(--bg-elev)', border:'none', borderRadius:'18px',
+            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+            gap:'3px', cursor:'pointer', color:'var(--ink)',
+          }}>
+            <span style={{ fontSize:'20px', fontWeight:700, lineHeight:1 }}>{lang === 'ar' ? 'EN' : 'ع'}</span>
+            <span style={{ fontSize:'10px', color:'var(--ink-mute)' }}>{lang === 'ar' ? 'English' : 'عربي'}</span>
+          </button>
         </div>
 
         {/* Nav links */}
