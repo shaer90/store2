@@ -218,7 +218,6 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
         <div style={{ display:'flex', borderTop:'1px solid var(--line)', paddingBottom:'env(safe-area-inset-bottom)' }}>
           {[
             { icon:'home',   ar:'الرئيسية', en:'Home',    action:() => { setPage&&setPage('home'); close(); } },
-            { icon:'shop',   ar:'التسوق',   en:'Shop',    action:() => { setPage&&setPage('shop'); close(); } },
             { icon:'search', ar:'البحث',    en:'Search',  action:() => { setPage&&setPage('search'); close(); } },
             { icon:'heart',  ar:'WISH',     en:'WISH',    action:() => { setPage&&setPage('wish'); close(); } },
             { icon:'user',   ar:'حسابي',    en:'Account', action:() => { onAccount&&onAccount(); close(); } },
