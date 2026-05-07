@@ -413,7 +413,8 @@ body.mode-app.desktop-host .device-label {
   body.mode-web .web-nav .links { display: none; }
   body.mode-web .web-nav .web-search { display: none; }
   body.mode-web .web-nav .install-cta { display: none; }
-  body.mode-web .web-nav .langtoggle { display: none; }
+  body.mode-web .web-nav .langtoggle,
+  body.mode-web .web-nav .langtoggle-single { display: none; }
 
   /* show bottom nav on mobile web */
   body.mode-web .web-bottom-nav {

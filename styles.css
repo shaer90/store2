@@ -154,6 +154,15 @@ img { max-width: 100%; display: block; }
 .langtoggle button.active {
   background: var(--ink); color: #000;
 }
+.langtoggle-single {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--bg-elev);
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  color: var(--ink); cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.langtoggle-single:hover { background: var(--bg-elev-2); }
 
 /* ============= Buttons ============= */
 

@@ -46,10 +46,9 @@ function WebNav({ lang, setLang, page, setPage, cartCount, wishCount, onInstall,
           <input placeholder={lang==='ar'?'بحث':'Search...'} onClick={() => setPage('search')} readOnly />
           <kbd>⌘K</kbd>
         </div>
-        <div className="langtoggle">
-          <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
-          <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
-        </div>
+        <button className="langtoggle-single" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}>
+          {lang === 'ar' ? 'EN' : 'ع'}
+        </button>
         <button className="iconbtn" onClick={() => setPage('wish')}>
           <Icon name="heart" />
           {wishCount > 0 && <span className="badge">{wishCount}</span>}

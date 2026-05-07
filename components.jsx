@@ -121,10 +121,9 @@ function TopBar({ lang, setLang, onCart, onWish, onAccount, cartCount, wishCount
     <div className="topbar">
       <span className="logo"><span className="dot"></span>NOIR</span>
       <div className="spacer"></div>
-      <div className="langtoggle">
-        <button className={lang==='ar'?'active':''} onClick={() => setLang('ar')}>ع</button>
-        <button className={lang==='en'?'active':''} onClick={() => setLang('en')}>EN</button>
-      </div>
+      <button className="langtoggle-single" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}>
+        {lang === 'ar' ? 'EN' : 'ع'}
+      </button>
       <button className="iconbtn" onClick={onWish} aria-label="wishlist">
         <Icon name="heart" />{wishCount > 0 && <span className="badge">{wishCount}</span>}
       </button>
